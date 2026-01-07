@@ -4,9 +4,9 @@ spring:
 
   # データソース設定
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5434/newdb}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/migration_db}
     username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:password}
+    password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: ${DB_POOL_SIZE:10}

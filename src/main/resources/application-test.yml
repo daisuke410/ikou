@@ -3,9 +3,9 @@
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5434/testdb
+    url: jdbc:postgresql://localhost:5432/migration_db
     username: postgres
-    password: password
+    password: postgres
 
 # バッチ処理固有の設定（テスト環境）
 batch:

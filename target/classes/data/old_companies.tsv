@@ -1,0 +1,16 @@
+company_code	company_name	representative_name	industry_type	employee_count	capital	established_date	address	postal_code	phone	email	status
+COMP001	株式会社サンプル商事	山田太郎	1	150	50000000	2010-04-01	東京都千代田区丸の内1-1-1	100-0001	03-1234-5678	info@sample-corp.co.jp	ACTIVE
+COMP002	佐藤製造株式会社	佐藤次郎	2	300	120000000	2005-07-15	大阪府大阪市中央区本町2-2-2	541-0001	06-2345-6789	contact@sato-mfg.co.jp	ACTIVE
+COMP003	鈴木建設	鈴木三郎	3	80	30000000	2015-01-10	愛知県名古屋市中区錦3-3-3	460-0003	052-3456-7890	info@suzuki-const.co.jp	ACTIVE
+COMP004	田中ITソリューションズ	田中四郎	4	200	80000000	2012-09-01	東京都渋谷区渋谷4-4-4	150-0002	03-4567-8901	support@tanaka-it.co.jp	ACTIVE
+COMP005	伊藤商店	伊藤五郎	5	20	5000000	1998-03-20	北海道札幌市中央区北5条5-5-5	060-0005	011-5678-9012	shop@ito-store.co.jp	INACTIVE
+COMP006	渡辺運輸株式会社	渡辺六郎	6	250	100000000	2008-11-10	神奈川県横浜市西区みなとみらい6-6-6	220-0006	045-6789-0123	logistics@watanabe-trans.co.jp	ACTIVE
+COMP007	中村食品工業	中村七郎	7	180	60000000	2011-05-25	京都府京都市下京区烏丸7-7-7	600-0007	075-7890-1234	info@nakamura-foods.co.jp	ACTIVE
+COMP008	小林エンジニアリング	小林八郎	2	120	45000000	2013-02-14	兵庫県神戸市中央区三宮8-8-8	650-0008	078-8901-2345	eng@kobayashi-eng.co.jp	ACTIVE
+COMP009	加藤不動産	加藤九郎	8	50	35000000	2007-06-30	埼玉県さいたま市大宮区大門9-9-9	330-0009	048-9012-3456	realestate@kato-fudosan.co.jp	ACTIVE
+COMP010	吉田コンサルティング	吉田十郎	9	30	15000000	2016-08-01	千葉県千葉市中央区中央10-10-10	260-0010	043-0123-4567	consult@yoshida-consulting.co.jp	ACTIVE
+COMP011	山本電機株式会社	山本一郎	2	400	150000000	2000-12-15	広島県広島市中区紙屋町11-11-11	730-0011	082-1234-5678	info@yamamoto-denki.co.jp	ACTIVE
+COMP012	松本貿易	松本二郎	1	100	40000000	2009-10-20	宮城県仙台市青葉区一番町12-12-12	980-0012	022-2345-6789	trade@matsumoto-trade.co.jp	ACTIVE
+COMP013	井上薬品	井上三郎	10	90	25000000	2014-03-05	静岡県静岡市葵区呉服町13-13-13	420-0013	054-3456-7890	pharmacy@inoue-pharma.co.jp	INACTIVE
+COMP014	木村出版	木村四郎	11	60	20000000	2010-07-18	新潟県新潟市中央区古町14-14-14	950-0014	025-4567-8901	publish@kimura-books.co.jp	ACTIVE
+COMP015	林金属工業	林五郎	2	220	90000000	2006-04-12	熊本県熊本市中央区手取本町15-15-15	860-0015	096-5678-9012	metal@hayashi-metal.co.jp	ACTIVE

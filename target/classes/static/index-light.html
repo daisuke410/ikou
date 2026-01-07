@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Migration Dashboard - Spring Batch</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 32px 40px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border-left: 6px solid #2563eb;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .app-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .header-text h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .header-text p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .version-badges {
+            display: flex;
+            gap: 10px;
+        }
+
+        .version-badge {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #2563eb;
+            font-weight: 600;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .card-icon.blue {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+
+        .card-icon.green {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .card-icon.purple {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        }
+
+        .card-icon.orange {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .control-area {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .switch-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f8fafc;
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .switch {
+            position: relative;
+            width: 48px;
+            height: 26px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: .4s;
+            border-radius: 26px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+        .switch-label {
+            color: #475569;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .metric-box {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .metric-box:hover {
+            border-color: #cbd5e1;
+            transform: translateY(-2px);
+        }
+
+        .metric-label {
+            color: #64748b;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .metric-value {
+            color: #1e293b;
+            font-size: 32px;
+            font-weight: 800;
+            font-family: 'SF Mono', 'Courier New', monospace;
+        }
+
+        .metric-value.running {
+            color: #f59e0b;
+        }
+
+        .metric-value.completed {
+            color: #10b981;
+        }
+
+        .metric-value.failed {
+            color: #ef4444;
+        }
+
+        .progress-section {
+            margin-top: 24px;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .progress-percent {
+            font-size: 14px;
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        .progress-track {
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2563eb, #1d4ed8);
+            border-radius: 6px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: progressShine 2s infinite;
+        }
+
+        @keyframes progressShine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .stat-number {
+            color: #1e293b;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .stat-number.warning {
+            color: #f59e0b;
+        }
+
+        .stat-number.success {
+            color: #10b981;
+        }
+
+        .log-card {
+            grid-column: 1 / -1;
+        }
+
+        .log-container {
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 20px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: 'SF Mono', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .log-container::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .log-container::-webkit-scrollbar-track {
+            background: #1e293b;
+            border-radius: 5px;
+        }
+
+        .log-container::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 5px;
+        }
+
+        .log-container::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        .log-line {
+            margin-bottom: 6px;
+            animation: logFadeIn 0.4s ease;
+        }
+
+        @keyframes logFadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .log-timestamp {
+            color: #94a3b8;
+            margin-right: 12px;
+        }
+
+        .log-text {
+            color: #e2e8f0;
+        }
+
+        .log-text.success {
+            color: #34d399;
+        }
+
+        .log-text.error {
+            color: #f87171;
+        }
+
+        .log-text.info {
+            color: #60a5fa;
+        }
+
+        .footer {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 13px;
+            margin-top: 24px;
+            padding: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .header-content {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="app-icon">📊</div>
+                    <div class="header-text">
+                        <h1>Data Migration Dashboard</h1>
+                        <p>TSV to PostgreSQL Migration Platform</p>
+                    </div>
+                </div>
+                <div class="version-badges">
+                    <span class="version-badge">Spring Batch 5.x</span>
+                    <span class="version-badge">Spring Boot 3.x</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Left Column -->
+            <div>
+                <!-- Control Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon blue">🎮</div>
+                        <h2 class="card-title">バッチ実行コントロール</h2>
+                    </div>
+                    <div class="control-area">
+                        <button class="btn btn-primary" id="startButton" onclick="startBatch()">
+                            <span>▶</span>
+                            <span>バッチ実行開始</span>
+                        </button>
+                        <div class="switch-container">
+                            <label class="switch">
+                                <input type="checkbox" id="maskingCheckbox">
+                                <span class="slider"></span>
+                            </label>
+                            <span class="switch-label">🔒 データマスク有効化（テスト環境）</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Card -->
+                <div class="card" style="margin-top: 24px;">
+                    <div class="card-header">
+                        <div class="card-icon green">📈</div>
+                        <h2 class="card-title">実行ステータス</h2>
+                    </div>
+                    <div class="metrics-grid">
+                        <div class="metric-box">
+                            <div class="metric-label">Execution ID</div>
+                            <div class="metric-value" id="executionId">-</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-label">Status</div>
+                            <div class="metric-value" id="status">待機中</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-label">Read Count</div>
+                            <div class="metric-value" id="readCount">0</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-label">Write Count</div>
+                            <div class="metric-value" id="writeCount">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div>
+                <!-- Progress Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon purple">⚡</div>
+                        <h2 class="card-title">処理進捗</h2>
+                    </div>
+                    <div class="progress-section">
+                        <div class="progress-info">
+                            <span class="progress-text">全体進捗率</span>
+                            <span class="progress-percent" id="progressPercentage">0%</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" id="progressBar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <div class="stat-label">Skip Count</div>
+                            <div class="stat-number warning" id="skipCount">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Success Rate</div>
+                            <div class="stat-number success" id="successRate">100%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Log Card -->
+        <div class="card log-card">
+            <div class="card-header">
+                <div class="card-icon orange">📝</div>
+                <h2 class="card-title">システムログ</h2>
+            </div>
+            <div class="log-container" id="logArea"></div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            Spring Batch Data Migration Tool v1.0.0 | Built with Spring Boot & Java
+        </div>
+    </div>
+
+    <script>
+        let currentExecutionId = null;
+        let statusTimer = null;
+
+        function log(message, type = 'info') {
+            const logArea = document.getElementById('logArea');
+            const time = new Date().toLocaleTimeString('ja-JP');
+            const entry = document.createElement('div');
+            entry.className = 'log-line';
+
+            let textClass = 'log-text';
+            let icon = '•';
+
+            if (type === 'error') {
+                textClass = 'log-text error';
+                icon = '✖';
+            } else if (type === 'success') {
+                textClass = 'log-text success';
+                icon = '✔';
+            } else if (type === 'info') {
+                textClass = 'log-text info';
+                icon = '➜';
+            }
+
+            entry.innerHTML = `<span class="log-timestamp">[${time}]</span><span class="${textClass}">${icon} ${message}</span>`;
+            logArea.appendChild(entry);
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        async function startBatch() {
+            const startButton = document.getElementById('startButton');
+            const maskingCheckbox = document.getElementById('maskingCheckbox');
+
+            startButton.disabled = true;
+            maskingCheckbox.disabled = true;
+
+            log('バッチジョブ実行リクエストを送信中...', 'info');
+
+            try {
+                const requestBody = maskingCheckbox.checked
+                    ? { maskingEnabled: 'true' }
+                    : {};
+
+                const response = await fetch('/api/batch/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentExecutionId = data.executionId;
+                    document.getElementById('executionId').textContent = currentExecutionId;
+                    document.getElementById('status').textContent = '実行中';
+                    document.getElementById('status').className = 'metric-value running';
+
+                    log(`バッチジョブを開始しました（実行ID: ${currentExecutionId}）`, 'success');
+                    if (maskingCheckbox.checked) {
+                        log('データマスク処理が有効化されています', 'info');
+                    }
+
+                    startStatusPolling();
+                } else {
+                    log(`エラー: ${data.message}`, 'error');
+                    startButton.disabled = false;
+                    maskingCheckbox.disabled = false;
+                }
+            } catch (error) {
+                log(`接続エラー: ${error.message}`, 'error');
+                startButton.disabled = false;
+                maskingCheckbox.disabled = false;
+            }
+        }
+
+        function startStatusPolling() {
+            if (statusTimer) {
+                clearInterval(statusTimer);
+            }
+
+            statusTimer = setInterval(updateStatus, 3000);
+        }
+
+        async function updateStatus() {
+            if (!currentExecutionId) return;
+
+            try {
+                const response = await fetch(`/api/batch/status/${currentExecutionId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const status = data.status;
+                    const statusElement = document.getElementById('status');
+                    statusElement.textContent = status;
+
+                    if (status === 'COMPLETED') {
+                        statusElement.className = 'metric-value completed';
+                        document.getElementById('progressBar').style.width = '100%';
+                        document.getElementById('progressPercentage').textContent = '100%';
+                        document.getElementById('startButton').disabled = false;
+                        document.getElementById('maskingCheckbox').disabled = false;
+                        log('バッチジョブが正常に完了しました', 'success');
+                        clearInterval(statusTimer);
+                    } else if (status === 'FAILED') {
+                        statusElement.className = 'metric-value failed';
+                        document.getElementById('startButton').disabled = false;
+                        document.getElementById('maskingCheckbox').disabled = false;
+                        log('バッチジョブが失敗しました', 'error');
+                        clearInterval(statusTimer);
+                    } else if (status === 'STARTED' || status === 'STARTING') {
+                        statusElement.className = 'metric-value running';
+                        const currentWidth = parseInt(document.getElementById('progressBar').style.width) || 0;
+                        if (currentWidth < 90) {
+                            const newWidth = currentWidth + 5;
+                            document.getElementById('progressBar').style.width = newWidth + '%';
+                            document.getElementById('progressPercentage').textContent = newWidth + '%';
+                        }
+                    }
+
+                    if (data.totalReadCount !== undefined) {
+                        document.getElementById('readCount').textContent = data.totalReadCount.toLocaleString();
+                    }
+                    if (data.totalWriteCount !== undefined) {
+                        document.getElementById('writeCount').textContent = data.totalWriteCount.toLocaleString();
+                    }
+                    if (data.totalSkipCount !== undefined) {
+                        document.getElementById('skipCount').textContent = data.totalSkipCount.toLocaleString();
+                    }
+
+                    const readCount = data.totalReadCount || 0;
+                    const skipCount = data.totalSkipCount || 0;
+                    if (readCount > 0) {
+                        const successRate = ((readCount - skipCount) / readCount * 100).toFixed(1);
+                        document.getElementById('successRate').textContent = successRate + '%';
+                    }
+                }
+            } catch (error) {
+                // ステータス取得エラーは無視
+            }
+        }
+
+        window.onload = function() {
+            log('Data Migration Dashboard を起動しました', 'success');
+            log('バッチを開始するには「バッチ実行開始」ボタンをクリックしてください', 'info');
+            log('システム準備完了 - Ready to migrate data', 'success');
+        };
+    </script>
+</body>
+</html>

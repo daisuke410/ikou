@@ -1,0 +1,36 @@
+セクション,項目,値
+ジョブ情報,ジョブID,51
+ジョブ情報,ジョブ名,dataMigrationJob
+ジョブ情報,ステータス,COMPLETED
+ジョブ情報,終了コード,COMPLETED
+実行時間,開始時刻,2025-12-31 22:59:32
+実行時間,終了時刻,2025-12-31 22:59:32
+実行時間,処理時間(秒),0
+実行時間,処理時間(ミリ秒),63
+ステップ1(customerMigrationStep),ステータス,COMPLETED
+ステップ1(customerMigrationStep),読み込み件数,0
+ステップ1(customerMigrationStep),書き込み件数,0
+ステップ1(customerMigrationStep),読み込みスキップ件数,0
+ステップ1(customerMigrationStep),処理スキップ件数,0
+ステップ1(customerMigrationStep),書き込みスキップ件数,0
+ステップ1(customerMigrationStep),スキップ合計,0
+ステップ1(customerMigrationStep),コミット回数,1
+ステップ1(customerMigrationStep),ロールバック回数,0
+ステップ1(customerMigrationStep),処理時間(秒),0
+ステップ1(customerMigrationStep),処理速度(件/秒),0.00
+ステップ2(companyMigrationStep),ステータス,COMPLETED
+ステップ2(companyMigrationStep),読み込み件数,15
+ステップ2(companyMigrationStep),書き込み件数,15
+ステップ2(companyMigrationStep),読み込みスキップ件数,0
+ステップ2(companyMigrationStep),処理スキップ件数,0
+ステップ2(companyMigrationStep),書き込みスキップ件数,0
+ステップ2(companyMigrationStep),スキップ合計,0
+ステップ2(companyMigrationStep),コミット回数,1
+ステップ2(companyMigrationStep),ロールバック回数,0
+ステップ2(companyMigrationStep),処理時間(秒),0
+ステップ2(companyMigrationStep),処理速度(件/秒),0.00
+サマリー,総読み込み件数,15
+サマリー,総書き込み件数,15
+サマリー,総スキップ件数,0
+サマリー,全体処理速度(件/秒),0.00
+サマリー,成功率(%),100.00

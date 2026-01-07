@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Migration Terminal - Hacker Theme</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+
+        @keyframes scanlines {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100%; }
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            41%, 43% { opacity: 0.95; }
+            45%, 47% { opacity: 0.98; }
+        }
+
+        body {
+            font-family: 'Lucida Console', 'Courier New', monospace;
+            background: #000;
+            color: #33ff33;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 0, 0, 0.15),
+                    rgba(0, 0, 0, 0.15) 1px,
+                    transparent 1px,
+                    transparent 2px
+                );
+            pointer-events: none;
+            z-index: 1000;
+            animation: scanlines 10s linear infinite;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(
+                ellipse at center,
+                transparent 0%,
+                rgba(0, 0, 0, 0.5) 100%
+            );
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+            animation: flicker 0.01s infinite;
+        }
+
+        .terminal {
+            background: rgba(0, 20, 0, 0.95);
+            border: 2px solid #33ff33;
+            box-shadow:
+                0 0 20px rgba(51, 255, 51, 0.5),
+                inset 0 0 30px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+        }
+
+        .terminal-header {
+            background: rgba(0, 40, 0, 0.9);
+            border-bottom: 2px solid #33ff33;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .terminal-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .terminal-button.red {
+            background: #ff5f56;
+            box-shadow: 0 0 5px #ff5f56;
+        }
+
+        .terminal-button.yellow {
+            background: #ffbd2e;
+            box-shadow: 0 0 5px #ffbd2e;
+        }
+
+        .terminal-button.green {
+            background: #27c93f;
+            box-shadow: 0 0 5px #27c93f;
+        }
+
+        .terminal-title {
+            margin-left: 15px;
+            color: #33ff33;
+            font-size: 14px;
+            text-shadow: 0 0 10px #33ff33;
+        }
+
+        .terminal-body {
+            padding: 25px;
+        }
+
+        .header-hack {
+            margin-bottom: 25px;
+        }
+
+        .header-hack h1 {
+            font-size: 28px;
+            color: #33ff33;
+            text-shadow: 0 0 15px #33ff33;
+            margin-bottom: 8px;
+            font-family: 'Lucida Console', monospace;
+        }
+
+        .header-hack p {
+            color: #33ff33;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .header-hack p::before {
+            content: '> ';
+            color: #ff3333;
+        }
+
+        .grid-hack {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .section-hack {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            color: #ff3333;
+            font-size: 14px;
+            margin-bottom: 15px;
+            text-shadow: 0 0 5px #ff3333;
+            font-weight: 700;
+        }
+
+        .section-title::before {
+            content: '# ';
+        }
+
+        .full-hack {
+            grid-column: 1 / -1;
+        }
+
+        .btn-hack {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #33ff33;
+            color: #33ff33;
+            padding: 15px 35px;
+            font-family: 'Lucida Console', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 10px rgba(51, 255, 51, 0.3);
+            text-shadow: 0 0 5px #33ff33;
+            position: relative;
+        }
+
+        .btn-hack::before {
+            content: '[ ';
+        }
+
+        .btn-hack::after {
+            content: ' ]';
+        }
+
+        .btn-hack:hover:not(:disabled) {
+            background: rgba(51, 255, 51, 0.1);
+            box-shadow: 0 0 20px rgba(51, 255, 51, 0.6);
+            border-color: #ff3333;
+            color: #ff3333;
+            text-shadow: 0 0 10px #ff3333;
+        }
+
+        .btn-hack:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .checkbox-hack {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        input[type="checkbox"].hack-checkbox {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #33ff33;
+            background: rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 0 5px rgba(51, 255, 51, 0.3);
+        }
+
+        input[type="checkbox"].hack-checkbox::before {
+            content: 'X';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            color: #ff3333;
+            font-weight: 700;
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+
+        input[type="checkbox"].hack-checkbox:checked::before {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .checkbox-label-hack {
+            color: #33ff33;
+            font-size: 13px;
+            text-shadow: 0 0 5px #33ff33;
+        }
+
+        .metrics-hack {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .metric-hack {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #33ff33;
+            padding: 18px;
+            box-shadow: 0 0 10px rgba(51, 255, 51, 0.2);
+        }
+
+        .metric-label-hack {
+            color: #33ff33;
+            font-size: 11px;
+            margin-bottom: 10px;
+            opacity: 0.7;
+        }
+
+        .metric-label-hack::before {
+            content: '> ';
+            color: #ff3333;
+        }
+
+        .metric-value-hack {
+            color: #33ff33;
+            font-size: 36px;
+            font-weight: 700;
+            text-shadow: 0 0 10px #33ff33;
+            font-family: 'Lucida Console', monospace;
+        }
+
+        .metric-value-hack.running {
+            color: #ffff33;
+            text-shadow: 0 0 15px #ffff33;
+            animation: blink 1s infinite;
+        }
+
+        .metric-value-hack.completed {
+            color: #33ff33;
+            text-shadow: 0 0 20px #33ff33;
+        }
+
+        .metric-value-hack.failed {
+            color: #ff3333;
+            text-shadow: 0 0 15px #ff3333;
+        }
+
+        .progress-hack {
+            margin-top: 20px;
+        }
+
+        .progress-info-hack {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            color: #33ff33;
+            font-size: 13px;
+            text-shadow: 0 0 5px #33ff33;
+        }
+
+        .progress-track-hack {
+            height: 25px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #33ff33;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .progress-fill-hack {
+            height: 100%;
+            background: repeating-linear-gradient(
+                90deg,
+                #33ff33,
+                #33ff33 10px,
+                #00cc00 10px,
+                #00cc00 20px
+            );
+            transition: width 0.5s ease;
+            box-shadow: 0 0 20px rgba(51, 255, 51, 0.8);
+            position: relative;
+        }
+
+        .progress-fill-hack::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            animation: progress-shine 1.5s infinite;
+        }
+
+        @keyframes progress-shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .log-hack {
+            background: #000;
+            border: 2px solid #33ff33;
+            padding: 18px;
+            height: 320px;
+            overflow-y: auto;
+            font-family: 'Lucida Console', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            box-shadow:
+                inset 0 0 20px rgba(0, 0, 0, 0.5),
+                0 0 15px rgba(51, 255, 51, 0.3);
+        }
+
+        .log-hack::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .log-hack::-webkit-scrollbar-track {
+            background: #000;
+            border: 1px solid #33ff33;
+        }
+
+        .log-hack::-webkit-scrollbar-thumb {
+            background: #33ff33;
+            box-shadow: 0 0 10px #33ff33;
+        }
+
+        .log-line-hack {
+            margin-bottom: 6px;
+            color: #33ff33;
+        }
+
+        .log-time-hack {
+            color: #ff3333;
+            margin-right: 12px;
+        }
+
+        .log-msg-hack.success {
+            color: #33ff33;
+        }
+
+        .log-msg-hack.error {
+            color: #ff3333;
+            text-shadow: 0 0 5px #ff3333;
+        }
+
+        .log-msg-hack.info {
+            color: #3399ff;
+        }
+
+        .footer-hack {
+            text-align: center;
+            color: #33ff33;
+            font-size: 12px;
+            margin-top: 25px;
+            padding: 20px;
+            opacity: 0.7;
+        }
+
+        .footer-hack::before {
+            content: '[ ';
+            color: #ff3333;
+        }
+
+        .footer-hack::after {
+            content: ' ]';
+            color: #ff3333;
+        }
+
+        @media (max-width: 1024px) {
+            .grid-hack {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="terminal">
+            <div class="terminal-header">
+                <span class="terminal-button red"></span>
+                <span class="terminal-button yellow"></span>
+                <span class="terminal-button green"></span>
+                <span class="terminal-title">root@migration-server:~</span>
+            </div>
+            <div class="terminal-body">
+                <div class="header-hack">
+                    <h1>DATA MIGRATION TERMINAL</h1>
+                    <p>Unauthorized access detected. Logging session...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="grid-hack">
+            <!-- Control Panel -->
+            <div class="terminal full-hack">
+                <div class="terminal-header">
+                    <span class="terminal-button red"></span>
+                    <span class="terminal-button yellow"></span>
+                    <span class="terminal-button green"></span>
+                    <span class="terminal-title">control.sh</span>
+                </div>
+                <div class="terminal-body">
+                    <div class="section-hack">
+                        <div class="section-title">EXECUTION CONTROL</div>
+                        <button class="btn-hack" id="startButton" onclick="startBatch()">
+                            INIT MIGRATION
+                        </button>
+                        <div class="checkbox-hack">
+                            <input type="checkbox" class="hack-checkbox" id="maskingCheckbox">
+                            <span class="checkbox-label-hack">Enable data masking protocol</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Panel -->
+            <div class="terminal">
+                <div class="terminal-header">
+                    <span class="terminal-button red"></span>
+                    <span class="terminal-button yellow"></span>
+                    <span class="terminal-button green"></span>
+                    <span class="terminal-title">status.sh</span>
+                </div>
+                <div class="terminal-body">
+                    <div class="section-hack">
+                        <div class="section-title">SYSTEM STATUS</div>
+                        <div class="metrics-hack">
+                            <div class="metric-hack">
+                                <div class="metric-label-hack">exec_id</div>
+                                <div class="metric-value-hack" id="executionId">-</div>
+                            </div>
+                            <div class="metric-hack">
+                                <div class="metric-label-hack">status</div>
+                                <div class="metric-value-hack" id="status">IDLE</div>
+                            </div>
+                            <div class="metric-hack">
+                                <div class="metric-label-hack">read_cnt</div>
+                                <div class="metric-value-hack" id="readCount">0</div>
+                            </div>
+                            <div class="metric-hack">
+                                <div class="metric-label-hack">write_cnt</div>
+                                <div class="metric-value-hack" id="writeCount">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Panel -->
+            <div class="terminal">
+                <div class="terminal-header">
+                    <span class="terminal-button red"></span>
+                    <span class="terminal-button yellow"></span>
+                    <span class="terminal-button green"></span>
+                    <span class="terminal-title">progress.sh</span>
+                </div>
+                <div class="terminal-body">
+                    <div class="section-hack">
+                        <div class="section-title">PROGRESS MONITOR</div>
+                        <div class="progress-hack">
+                            <div class="progress-info-hack">
+                                <span>completion_rate:</span>
+                                <span id="progressPercentage">0%</span>
+                            </div>
+                            <div class="progress-track-hack">
+                                <div class="progress-fill-hack" id="progressBar" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                        <div class="metrics-hack" style="margin-top: 20px;">
+                            <div class="metric-hack">
+                                <div class="metric-label-hack">skip_cnt</div>
+                                <div class="metric-value-hack" id="skipCount">0</div>
+                            </div>
+                            <div class="metric-hack">
+                                <div class="metric-label-hack">success_rate</div>
+                                <div class="metric-value-hack" id="successRate">100%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Log Panel -->
+            <div class="terminal full-hack">
+                <div class="terminal-header">
+                    <span class="terminal-button red"></span>
+                    <span class="terminal-button yellow"></span>
+                    <span class="terminal-button green"></span>
+                    <span class="terminal-title">tail -f /var/log/migration.log</span>
+                </div>
+                <div class="terminal-body">
+                    <div class="section-hack">
+                        <div class="section-title">SYSTEM LOG</div>
+                        <div class="log-hack" id="logArea"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer-hack">
+            HACKER TERMINAL v1.0.0 | ACCESS GRANTED
+        </div>
+    </div>
+
+    <script>
+        let currentExecutionId = null;
+        let statusTimer = null;
+
+        function log(message, type = 'info') {
+            const logArea = document.getElementById('logArea');
+            const time = new Date().toLocaleTimeString('ja-JP');
+            const entry = document.createElement('div');
+            entry.className = 'log-line-hack';
+
+            let msgClass = 'log-msg-hack';
+            let prefix = '$';
+
+            if (type === 'error') {
+                msgClass = 'log-msg-hack error';
+                prefix = '!';
+            } else if (type === 'success') {
+                msgClass = 'log-msg-hack success';
+                prefix = '+';
+            } else if (type === 'info') {
+                msgClass = 'log-msg-hack info';
+                prefix = '*';
+            }
+
+            entry.innerHTML = `<span class="log-time-hack">[${time}]</span><span class="${msgClass}">${prefix} ${message}</span>`;
+            logArea.appendChild(entry);
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        async function startBatch() {
+            const startButton = document.getElementById('startButton');
+            const maskingCheckbox = document.getElementById('maskingCheckbox');
+
+            startButton.disabled = true;
+            maskingCheckbox.disabled = true;
+
+            log('Initializing migration sequence...', 'info');
+
+            try {
+                const requestBody = maskingCheckbox.checked
+                    ? { maskingEnabled: 'true' }
+                    : {};
+
+                const response = await fetch('/api/batch/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentExecutionId = data.executionId;
+                    document.getElementById('executionId').textContent = currentExecutionId;
+                    document.getElementById('status').textContent = 'RUNNING';
+                    document.getElementById('status').className = 'metric-value-hack running';
+
+                    log(`Migration started [exec_id=${currentExecutionId}]`, 'success');
+                    if (maskingCheckbox.checked) {
+                        log('Data masking protocol: ENABLED', 'info');
+                    }
+
+                    startStatusPolling();
+                } else {
+                    log(`Error: ${data.message}`, 'error');
+                    startButton.disabled = false;
+                    maskingCheckbox.disabled = false;
+                }
+            } catch (error) {
+                log(`Connection error: ${error.message}`, 'error');
+                startButton.disabled = false;
+                maskingCheckbox.disabled = false;
+            }
+        }
+
+        function startStatusPolling() {
+            if (statusTimer) {
+                clearInterval(statusTimer);
+            }
+
+            statusTimer = setInterval(updateStatus, 3000);
+        }
+
+        async function updateStatus() {
+            if (!currentExecutionId) return;
+
+            try {
+                const response = await fetch(`/api/batch/status/${currentExecutionId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const status = data.status;
+                    const statusElement = document.getElementById('status');
+                    statusElement.textContent = status;
+
+                    if (status === 'COMPLETED') {
+                        statusElement.className = 'metric-value-hack completed';
+                        document.getElementById('progressBar').style.width = '100%';
+                        document.getElementById('progressPercentage').textContent = '100%';
+                        document.getElementById('startButton').disabled = false;
+                        document.getElementById('maskingCheckbox').disabled = false;
+                        log('Migration completed successfully', 'success');
+                        clearInterval(statusTimer);
+                    } else if (status === 'FAILED') {
+                        statusElement.className = 'metric-value-hack failed';
+                        document.getElementById('startButton').disabled = false;
+                        document.getElementById('maskingCheckbox').disabled = false;
+                        log('Migration failed - terminating process', 'error');
+                        clearInterval(statusTimer);
+                    } else if (status === 'STARTED' || status === 'STARTING') {
+                        statusElement.className = 'metric-value-hack running';
+                        const currentWidth = parseInt(document.getElementById('progressBar').style.width) || 0;
+                        if (currentWidth < 90) {
+                            const newWidth = currentWidth + 5;
+                            document.getElementById('progressBar').style.width = newWidth + '%';
+                            document.getElementById('progressPercentage').textContent = newWidth + '%';
+                        }
+                    }
+
+                    if (data.totalReadCount !== undefined) {
+                        document.getElementById('readCount').textContent = data.totalReadCount.toLocaleString();
+                    }
+                    if (data.totalWriteCount !== undefined) {
+                        document.getElementById('writeCount').textContent = data.totalWriteCount.toLocaleString();
+                    }
+                    if (data.totalSkipCount !== undefined) {
+                        document.getElementById('skipCount').textContent = data.totalSkipCount.toLocaleString();
+                    }
+
+                    const readCount = data.totalReadCount || 0;
+                    const skipCount = data.totalSkipCount || 0;
+                    if (readCount > 0) {
+                        const successRate = ((readCount - skipCount) / readCount * 100).toFixed(1);
+                        document.getElementById('successRate').textContent = successRate + '%';
+                    }
+                }
+            } catch (error) {
+                // Silent error
+            }
+        }
+
+        window.onload = function() {
+            log('Terminal session initiated', 'success');
+            log('Loading migration tools...', 'info');
+            log('System ready for execution', 'success');
+        };
+    </script>
+</body>
+</html>

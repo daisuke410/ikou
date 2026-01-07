@@ -1,0 +1,43 @@
+{
+  "name": "data-migration-batch-tests",
+  "version": "1.0.0",
+  "description": "Playwright tests for Spring Batch Data Migration Application",
+  "main": "test-runner.js",
+  "bin": {
+    "playwright-test": "./test-runner.js"
+  },
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report",
+    "build:exe": "pkg . --targets node18-win-x64 --output dist/playwright-test-runner.exe",
+    "build:all": "pkg . --targets node18-win-x64,node18-linux-x64,node18-macos-x64 --output dist/playwright-test-runner"
+  },
+  "pkg": {
+    "assets": [
+      "playwright.config.ts",
+      "tests/**/*"
+    ],
+    "scripts": [
+      "test-runner.js"
+    ],
+    "targets": [
+      "node18-win-x64"
+    ],
+    "outputPath": "dist"
+  },
+  "keywords": [
+    "playwright",
+    "testing",
+    "spring-batch",
+    "standalone"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "pkg": "^5.8.1"
+  }
+}

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Migration System - Professional Edition v2</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+            background: #0f1419;
+            color: #e6edf3;
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: #161b22;
+            border: 1px solid #30363d;
+            padding: 24px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #e6edf3;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid #30363d;
+            background: #21262d;
+            color: #e6edf3;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: #30363d;
+            border-color: #58a6ff;
+        }
+
+        .btn-primary {
+            background: linear-gradient(180deg, #1f6feb 0%, #1a5ed8 100%);
+            border: 1px solid #1f6feb;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: linear-gradient(180deg, #388bfd 0%, #1f6feb 100%);
+        }
+
+        .btn-danger {
+            background: #f85149;
+            border: 1px solid #f85149;
+            color: #ffffff;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        .panel {
+            background: #161b22;
+            border: 1px solid #30363d;
+            padding: 24px;
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e6edf3;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #21262d;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            padding: 16px;
+        }
+
+        .stat-label {
+            color: #8b949e;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            color: #e6edf3;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .log-container {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            height: 400px;
+            overflow-y: auto;
+            padding: 16px;
+            font-family: 'SF Mono', 'Consolas', monospace;
+            font-size: 13px;
+        }
+
+        .log-entry {
+            margin-bottom: 4px;
+            color: #8b949e;
+        }
+
+        .log-time {
+            color: #6e7681;
+        }
+
+        .log-success { color: #3fb950; }
+        .log-error { color: #f85149; }
+        .log-info { color: #58a6ff; }
+        .log-warn { color: #f0883e; }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #21262d;
+        }
+
+        .history-table th {
+            color: #8b949e;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .history-table td {
+            color: #e6edf3;
+            font-size: 14px;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid;
+        }
+
+        .status-completed { background: #0d1117; color: #3fb950; border-color: #3fb950; }
+        .status-failed { background: #0d1117; color: #f85149; border-color: #f85149; }
+        .status-running { background: #0d1117; color: #58a6ff; border-color: #58a6ff; }
+
+        .progress-bar {
+            height: 6px;
+            background: #21262d;
+            margin: 16px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1f6feb, #58a6ff);
+            transition: width 0.3s ease;
+        }
+
+        .footer {
+            text-align: center;
+            color: #6e7681;
+            margin-top: 24px;
+            padding: 16px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Data Migration System - Professional Edition</h1>
+            <div class="btn-group">
+                <button class="btn btn-primary" id="startButton" onclick="startBatch()">開始</button>
+                <button class="btn btn-danger" id="stopButton" onclick="stopBatch()" disabled>停止</button>
+                <button class="btn" onclick="loadHistory()">履歴更新</button>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">読込件数</div>
+                <div class="stat-value" id="readCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">書込件数</div>
+                <div class="stat-value" id="writeCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">スキップ</div>
+                <div class="stat-value" id="skipCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">処理速度</div>
+                <div class="stat-value" id="speed">0.0 件/秒</div>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+        </div>
+
+        <div class="main-grid">
+            <div class="panel">
+                <div class="panel-title">リアルタイムログ</div>
+                <div class="log-container" id="logContainer">
+                    <div class="log-entry">システム起動完了。バッチジョブを開始してください。</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">実行履歴</div>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>ステータス</th>
+                                <th>開始時刻</th>
+                                <th>件数</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyBody">
+                            <tr><td colspan="4" style="text-align:center;color:#6e7681;">履歴なし</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Spring Batch Data Migration Tool v2.0.0 | Powered by Spring Boot 3.x + WebSocket
+        </div>
+    </div>
+
+    <script>
+        let currentExecutionId = null;
+        let statusTimer = null;
+        let stompClient = null;
+
+        // WebSocket接続
+        function connectWebSocket(executionId) {
+            const socket = new SockJS('/ws');
+            stompClient = Stomp.over(socket);
+
+            stompClient.connect({}, function(frame) {
+                addLog('WebSocket接続成功', 'success');
+
+                // 進捗通知を購読
+                stompClient.subscribe('/topic/progress/' + executionId, function(message) {
+                    const progress = JSON.parse(message.body);
+                    updateProgress(progress);
+                });
+            }, function(error) {
+                addLog('WebSocket接続エラー: ' + error, 'error');
+            });
+        }
+
+        // WebSocket切断
+        function disconnectWebSocket() {
+            if (stompClient !== null) {
+                stompClient.disconnect();
+                addLog('WebSocket切断', 'info');
+            }
+        }
+
+        // バッチ開始
+        async function startBatch() {
+            const startButton = document.getElementById('startButton');
+            const stopButton = document.getElementById('stopButton');
+
+            startButton.disabled = true;
+            addLog('バッチジョブを開始しています...', 'info');
+
+            try {
+                const response = await fetch('/api/batch/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    currentExecutionId = result.executionId;
+                    addLog('バッチジョブ開始 - ID: ' + currentExecutionId, 'success');
+
+                    stopButton.disabled = false;
+
+                    // WebSocket接続
+                    connectWebSocket(currentExecutionId);
+
+                    // ポーリング開始（WebSocketのバックアップ）
+                    statusTimer = setInterval(() => updateStatus(currentExecutionId), 3000);
+                } else {
+                    addLog('エラー: ' + result.message, 'error');
+                    startButton.disabled = false;
+                }
+            } catch (error) {
+                addLog('バッチ開始エラー: ' + error, 'error');
+                startButton.disabled = false;
+            }
+        }
+
+        // バッチ停止
+        async function stopBatch() {
+            if (!currentExecutionId) return;
+
+            addLog('バッチジョブを停止しています...', 'warn');
+
+            try {
+                const response = await fetch('/api/batch/stop/' + currentExecutionId, {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    addLog('バッチジョブ停止要求を送信しました', 'warn');
+                } else {
+                    addLog('停止エラー: ' + result.message, 'error');
+                }
+            } catch (error) {
+                addLog('停止リクエストエラー: ' + error, 'error');
+            }
+        }
+
+        // 進捗更新（WebSocketから）
+        function updateProgress(progress) {
+            document.getElementById('readCount').textContent = progress.readCount || 0;
+            document.getElementById('writeCount').textContent = progress.writeCount || 0;
+            document.getElementById('skipCount').textContent = progress.skipCount || 0;
+            document.getElementById('speed').textContent = (progress.writeSpeed || 0).toFixed(1) + ' 件/秒';
+
+            addLog(progress.message, 'info');
+        }
+
+        // ステータス更新（ポーリング）
+        async function updateStatus(executionId) {
+            try {
+                const response = await fetch('/api/batch/status/' + executionId);
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('readCount').textContent = result.totalReadCount || 0;
+                    document.getElementById('writeCount').textContent = result.totalWriteCount || 0;
+                    document.getElementById('skipCount').textContent = result.totalSkipCount || 0;
+
+                    if (result.status !== 'STARTED' && result.status !== 'STARTING') {
+                        clearInterval(statusTimer);
+                        disconnectWebSocket();
+
+                        document.getElementById('startButton').disabled = false;
+                        document.getElementById('stopButton').disabled = true;
+
+                        if (result.status === 'COMPLETED') {
+                            addLog('バッチジョブが正常に完了しました', 'success');
+                        } else {
+                            addLog('バッチジョブが終了しました: ' + result.status, 'warn');
+                        }
+
+                        loadHistory();
+                    }
+                }
+            } catch (error) {
+                console.error('Status update error:', error);
+            }
+        }
+
+        // 履歴読み込み
+        async function loadHistory() {
+            try {
+                const response = await fetch('/api/batch/history?page=0&size=10');
+                const result = await response.json();
+
+                if (result.success && result.history.length > 0) {
+                    const tbody = document.getElementById('historyBody');
+                    tbody.innerHTML = '';
+
+                    result.history.forEach(item => {
+                        const row = tbody.insertRow();
+                        row.innerHTML = `
+                            <td>${item.executionId}</td>
+                            <td><span class="status-badge status-${item.status.toLowerCase()}">${item.status}</span></td>
+                            <td>${new Date(item.startTime).toLocaleString('ja-JP')}</td>
+                            <td>${item.totalWriteCount}</td>
+                        `;
+                    });
+                }
+            } catch (error) {
+                console.error('History load error:', error);
+            }
+        }
+
+        // ログ追加
+        function addLog(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const time = new Date().toLocaleTimeString('ja-JP');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-${type}">${message}</span>`;
+
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        // 初期化
+        window.onload = function() {
+            loadHistory();
+        };
+    </script>
+</body>
+</html>

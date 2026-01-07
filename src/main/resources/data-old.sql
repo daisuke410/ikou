@@ -1,0 +1,25 @@
+-- 旧データベースの初期データ
+
+-- テストデータの挿入
+INSERT INTO old_customers (customer_code, customer_name, email, phone, address, postal_code, created_at, status, gender_code)
+VALUES
+('CUST001', '山田太郎', 'yamada.taro@example.com', '090-1234-5678', '東京都渋谷区1-2-3', '150-0001', NOW(), 'ACTIVE', 1),
+('CUST002', '佐藤花子', 'sato.hanako@example.com', '080-2345-6789', '大阪府大阪市北区4-5-6', '530-0001', NOW(), 'ACTIVE', 2),
+('CUST003', '鈴木一郎', 'suzuki.ichiro@example.com', '070-3456-7890', '愛知県名古屋市中区7-8-9', '460-0001', NOW(), 'INACTIVE', 1),
+('CUST004', '田中美咲', 'tanaka.misaki@example.com', '090-4567-8901', '福岡県福岡市博多区10-11-12', '812-0001', NOW(), 'ACTIVE', 2),
+('CUST005', '伊藤健太', 'ito.kenta@example.com', '080-5678-9012', '北海道札幌市中央区13-14-15', '060-0001', NOW(), 'ACTIVE', 1),
+('CUST006', '渡辺由美', 'watanabe.yumi@example.com', '070-6789-0123', '神奈川県横浜市西区16-17-18', '220-0001', NOW(), 'INACTIVE', 2),
+('CUST007', '中村雄二', 'nakamura.yuji@example.com', '090-7890-1234', '京都府京都市下京区19-20-21', '600-0001', NOW(), 'ACTIVE', 1),
+('CUST008', '小林さくら', 'kobayashi.sakura@example.com', '080-8901-2345', '兵庫県神戸市中央区22-23-24', '650-0001', NOW(), 'ACTIVE', 2),
+('CUST009', '加藤大輔', 'kato.daisuke@example.com', '070-9012-3456', '埼玉県さいたま市大宮区25-26-27', '330-0001', NOW(), 'ACTIVE', 1),
+('CUST010', '吉田真理', 'yoshida.mari@example.com', '090-0123-4567', '千葉県千葉市中央区28-29-30', '260-0001', NOW(), 'INACTIVE', 2),
+('CUST011', '山本浩二', 'yamamoto.koji@example.com', '080-1234-5678', '広島県広島市中区31-32-33', '730-0001', NOW(), 'ACTIVE', 1),
+('CUST012', '松本恵子', 'matsumoto.keiko@example.com', '070-2345-6789', '宮城県仙台市青葉区34-35-36', '980-0001', NOW(), 'ACTIVE', 2),
+('CUST013', '井上拓也', 'inoue.takuya@example.com', '090-3456-7890', '静岡県静岡市葵区37-38-39', '420-0001', NOW(), 'ACTIVE', 1),
+('CUST014', '木村麻衣', 'kimura.mai@example.com', '080-4567-8901', '新潟県新潟市中央区40-41-42', '950-0001', NOW(), 'INACTIVE', 2),
+('CUST015', '林健一', 'hayashi.kenichi@example.com', '070-5678-9012', '熊本県熊本市中央区43-44-45', '860-0001', NOW(), 'ACTIVE', 1),
+('CUST016', '斎藤美紀', 'saito.miki@example.com', '090-6789-0123', '岡山県岡山市北区46-47-48', '700-0001', NOW(), 'ACTIVE', 2),
+('CUST017', '清水秀樹', 'shimizu.hideki@example.com', '080-7890-1234', '長野県長野市49-50-51', '380-0001', NOW(), 'ACTIVE', 1),
+('CUST018', '森田智子', 'morita.tomoko@example.com', '070-8901-2345', '岐阜県岐阜市52-53-54', '500-0001', NOW(), 'INACTIVE', 2),
+('CUST019', '橋本竜也', 'hashimoto.tatsuya@example.com', '090-9012-3456', '三重県津市55-56-57', '514-0001', NOW(), 'ACTIVE', 1),
+('CUST020', '石川友香', 'ishikawa.yuka@example.com', '080-0123-4567', '沖縄県那覇市58-59-60', '900-0001', NOW(), 'ACTIVE', 2);

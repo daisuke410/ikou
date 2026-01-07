@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI Theme Selection - Spring Batch Data Migration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .selection-container {
+            max-width: 1400px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            margin-bottom: 12px;
+            letter-spacing: -1px;
+        }
+
+        .header p {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        .themes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 28px;
+            margin-bottom: 40px;
+        }
+
+        .theme-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .theme-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .theme-preview {
+            width: 100%;
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-preview::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.6) 100%);
+        }
+
+        .theme-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #667eea;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .theme-preview.dark {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+        }
+
+        .theme-preview.light {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .theme-preview.professional {
+            background: linear-gradient(135deg, #0f1419 0%, #1c2128 100%);
+        }
+
+        .theme-preview.corporate {
+            background: linear-gradient(135deg, #1a1d29 0%, #2d3748 100%);
+        }
+
+        .theme-preview.minimal {
+            background: linear-gradient(135deg, #0a0e1a 0%, #161b22 100%);
+        }
+
+        .theme-preview.enterprise {
+            background: linear-gradient(135deg, #0c111b 0%, #1a2332 100%);
+        }
+
+        .preview-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 18px;
+            color: white;
+        }
+
+        .preview-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .preview-subtitle {
+            font-size: 12px;
+            opacity: 0.95;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .theme-info {
+            padding: 24px;
+        }
+
+        .theme-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .theme-description {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .feature-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .tag {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .select-button {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .select-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            margin-top: 40px;
+        }
+
+        .quick-note {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px 28px;
+            margin-top: 30px;
+            color: white;
+            text-align: center;
+        }
+
+        .quick-note strong {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .quick-note p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 32px;
+            }
+
+            .themes-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .theme-card {
+            animation: fadeInUp 0.6s ease backwards;
+        }
+
+        .theme-card:nth-child(1) { animation-delay: 0.05s; }
+        .theme-card:nth-child(2) { animation-delay: 0.1s; }
+        .theme-card:nth-child(3) { animation-delay: 0.15s; }
+        .theme-card:nth-child(4) { animation-delay: 0.2s; }
+        .theme-card:nth-child(5) { animation-delay: 0.25s; }
+        .theme-card:nth-child(6) { animation-delay: 0.3s; }
+        .theme-card:nth-child(7) { animation-delay: 0.35s; }
+    </style>
+</head>
+<body>
+    <div class="selection-container">
+        <div class="header">
+            <h1>🎨 UIテーマを選択してください</h1>
+            <p>お好みのデザインでデータ移行ツールをご利用ください</p>
+        </div>
+
+        <div class="themes-grid">
+            <!-- Dark Theme -->
+            <div class="theme-card" onclick="window.location.href='index-dark.html'">
+                <div class="theme-preview dark">
+                    <div class="theme-badge">推奨</div>
+                    <div class="preview-content">
+                        <div class="preview-title">⚡ Data Migration Console</div>
+                        <div class="preview-subtitle">グラスモーフィズム × ダーク</div>
+                    </div>
+                </div>
+                <div class="theme-info">
+                    <div class="theme-name">Dark Theme (Console Style)</div>
+                    <div class="theme-description">
+                        プロフェッショナルなダークテーマ。グラスモーフィズムで透過効果とぼかしを活用。
+                    </div>
+                    <div class="feature-tags">
+                        <span class="tag">🌙 ダーク</span>
+                        <span class="tag">✨ グラス</span>
+                        <span class="tag">💚 グリーン</span>
+                    </div>
+                    <button class="select-button">このテーマを使用</button>
+                </div>
+            </div>
+
+            <!-- Light Theme -->
+            <div class="theme-card" onclick="window.location.href='index-light.html'">
+                <div class="theme-preview light">
+                    <div class="preview-content">
+                        <div class="preview-title" style="color: #1e293b;">📊 Data Migration Dashboard</div>
+                        <div class="preview-subtitle" style="color: #475569;">モダン × ライト</div>
+                    </div>
+                </div>
+                <div class="theme-info">
+                    <div class="theme-name">Light Theme (Dashboard Style)</div>
+                    <div class="theme-description">
+                        明るく洗練されたライトテーマ。ホワイトベースで視認性抜群。
+                    </div>
+                    <div class="feature-tags">
+                        <span class="tag">☀️ ライト</span>
+                        <span class="tag">🎯 カード</span>
+                        <span class="tag">💙 ブルー</span>
+                    </div>
+                    <button class="select-button">このテーマを使用</button>
+                </div>
+            </div>
+
+            <!-- Professional Theme -->
+            <div class="theme-card" onclick="window.location.href='index-professional.html'">
+                <div class="theme-preview professional">
+                    <div class="theme-badge">業務向け</div>
+                    <div class="preview-content">
+                        <div class="preview-title">Data Migration System</div>
+                        <div class="preview-subtitle">GitHub風 × プロフェッショナル</div>
+                    </div>
+                </div>
+                <div class="theme-info">
+                    <div class="theme-name">Professional Theme</div>
+                    <div class="theme-description">
+                        GitHub風のプロフェッショナルテーマ。シンプルで角ばったデザイン、ブルーアクセント。
+                    </div>
+                    <div class="feature-tags">
+                        <span class="tag">💼 プロ仕様</span>
+                        <span class="tag">□ 角デザイン</span>
+                        <span class="tag">💙 ブルー</span>
+                    </div>
+                    <button class="select-button">このテーマを使用</button>
+                </div>
+            </div>
+
+            <!-- Corporate Theme -->
+            <div class="theme-card" onclick="window.location.href='index-corporate.html'">
+                <div class="theme-preview corporate">
+                    <div class="theme-badge">企業向け</div>
+                    <div class="preview-content">
+                        <div class="preview-title">Corporate Data Migration</div>
+                        <div class="preview-subtitle">コーポレート × オレンジ</div>
+                    </div>
+                </div>
+                <div class="theme-info">
+                    <div class="theme-name">Corporate Theme</div>
+                    <div class="theme-description">
+                        企業向けコーポレートテーマ。左ボーダーアクセント、オレンジ強調カラー。
+                    </div>
+                    <div class="feature-tags">
+                        <span class="tag">🏢 企業向け</span>
+                        <span class="tag">□ 角デザイン</span>
+                        <span class="tag">🧡 オレンジ</span>
+                    </div>
+                    <button class="select-button">このテーマを使用</button>
+                </div>
+            </div>
+
+            <!-- Minimal Theme -->
+            <div class="theme-card" onclick="window.location.href='index-minimal.html'">
+                <div class="theme-preview minimal">
+                    <div class="preview-content">
+                        <div class="preview-title">Minimal Migration Tool</div>
+                        <div class="preview-subtitle">ミニマル × シンプル</div>
+                    </div>
+                </div>
+                <div class="theme-info">
+                    <div class="theme-name">Minimal Theme</div>
+                    <div class="theme-description">
+                        究極のミニマルデザイン。余分な装飾を排除、極細ボーダーで洗練された印象。
+                    </div>
+                    <div class="feature-tags">
+                        <span class="tag">✨ ミニマル</span>
+                        <span class="tag">□ 角デザイン</span>
+                        <span class="tag">💙 シアンブルー</span>
+                    </div>
+                    <button class="select-button">このテーマを使用</button>
+                </div>
+            </div>
+
+            <!-- Enterprise Theme -->
+            <div class="theme-card" onclick="window.location.href='index-enterprise.html'">
+                <div class="theme-preview enterprise">
+                    <div class="theme-badge">エンタープライズ</div>
+                    <div class="preview-content">
+                        <div class="preview-title">Enterprise Migration Platform</div>
+                        <div class="preview-subtitle">エンタープライズ × シアン</div>
+                    </div>
+                </div>
+                <div class="theme-info">
+                    <div class="theme-name">Enterprise Theme</div>
+                    <div class="theme-description">
+                        エンタープライズ向けプラットフォームデザイン。ブランドアイコン、ステータスインジケーター搭載。
+                    </div>
+                    <div class="feature-tags">
+                        <span class="tag">🏛️ エンタープライズ</span>
+                        <span class="tag">□ 角デザイン</span>
+                        <span class="tag">🩵 シアン</span>
+                    </div>
+                    <button class="select-button">このテーマを使用</button>
+                </div>
+            </div>
+
+            <!-- Professional v2 Theme -->
+            <div class="theme-card" onclick="window.location.href='index-professional-v2.html'">
+                <div class="theme-preview professional">
+                    <div class="theme-badge">NEW</div>
+                    <div class="preview-content">
+                        <div class="preview-title">Professional Edition v2</div>
+                        <div class="preview-subtitle">リアルタイム進捗 × WebSocket</div>
+                    </div>
+                </div>
+                <div class="theme-info">
+                    <div class="theme-name">Professional v2 (拡張版)</div>
+                    <div class="theme-description">
+                        WebSocketによるリアルタイム進捗通知、実行履歴表示、ジョブ停止機能を搭載した拡張版。
+                    </div>
+                    <div class="feature-tags">
+                        <span class="tag">🚀 WebSocket</span>
+                        <span class="tag">📊 リアルタイム</span>
+                        <span class="tag">📜 履歴表示</span>
+                    </div>
+                    <button class="select-button">このテーマを使用</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-note">
+            <strong>💡 ヒント</strong>
+            <p>すべてのテーマは同じ機能を提供します。デザインの好みで選択してください。後から別のテーマに変更することも可能です。</p>
+        </div>
+
+        <div class="footer">
+            Spring Batch Data Migration Tool v1.0.0 | Powered by Spring Boot 3.x
+        </div>
+    </div>
+</body>
+</html>

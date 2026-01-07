@@ -1,0 +1,25 @@
+# 本番環境用の設定ファイル
+# 使用方法: java -jar app.jar --spring.profiles.active=prod
+
+spring:
+  datasource:
+    url: ${DB_URL}  # 環境変数から取得（必須）
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 20
+
+# バッチ処理固有の設定（本番環境）
+batch:
+  chunk-size: 500  # 本番環境では大きなチャンクサイズで高速化
+  skip-limit: 100
+  # マスク処理を無効化（本番環境では生データをそのまま移行）
+  masking:
+    enabled: false
+
+# ロギング設定（本番環境ではINFOレベル）
+logging:
+  level:
+    com.example.batch: INFO
+    org.springframework.batch: WARN
+    org.hibernate.SQL: WARN

@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Migration Terminal - Cyberpunk Theme</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100vh); }
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.95; }
+        }
+
+        @keyframes neonPulse {
+            0%, 100% {
+                text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #0ff;
+            }
+            50% {
+                text-shadow: 0 0 20px #0ff, 0 0 30px #0ff, 0 0 40px #0ff, 0 0 50px #0ff;
+            }
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #0ff;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #0ff, transparent);
+            animation: scanline 4s linear infinite;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 255, 255, 0.03) 2px,
+                    rgba(0, 255, 255, 0.03) 4px
+                );
+            pointer-events: none;
+            animation: flicker 0.15s infinite;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #0ff;
+            border-radius: 0;
+            padding: 20px 30px;
+            margin-bottom: 20px;
+            box-shadow:
+                0 0 20px rgba(0, 255, 255, 0.5),
+                inset 0 0 20px rgba(0, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .header::before {
+            content: '▶';
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+            color: #f0f;
+            animation: neonPulse 2s infinite;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0ff;
+            text-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
+            letter-spacing: 3px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .header p {
+            color: #f0f;
+            font-size: 12px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px #f0f;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .terminal-panel {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #0ff;
+            padding: 0;
+            box-shadow:
+                0 0 20px rgba(0, 255, 255, 0.3),
+                inset 0 0 20px rgba(0, 255, 255, 0.05);
+            position: relative;
+        }
+
+        .terminal-header {
+            background: rgba(0, 255, 255, 0.1);
+            border-bottom: 2px solid #0ff;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-icon {
+            color: #f0f;
+            font-size: 18px;
+            text-shadow: 0 0 10px #f0f;
+        }
+
+        .terminal-title {
+            color: #0ff;
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 0 5px #0ff;
+        }
+
+        .terminal-body {
+            padding: 20px;
+        }
+
+        .control-full {
+            grid-column: 1 / -1;
+        }
+
+        .btn-cyber {
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid #0ff;
+            color: #0ff;
+            padding: 12px 30px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-cyber::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-cyber:hover:not(:disabled)::before {
+            left: 100%;
+        }
+
+        .btn-cyber:hover:not(:disabled) {
+            background: rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.8), inset 0 0 10px rgba(0, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-cyber:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .cyber-switch {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .switch-label-cyber {
+            color: #f0f;
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px #f0f;
+        }
+
+        input[type="checkbox"] {
+            appearance: none;
+            width: 50px;
+            height: 24px;
+            background: rgba(255, 0, 255, 0.1);
+            border: 2px solid #f0f;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+        }
+
+        input[type="checkbox"]::before {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: #f0f;
+            left: 1px;
+            top: 1px;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px #f0f;
+        }
+
+        input[type="checkbox"]:checked {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #0ff;
+        }
+
+        input[type="checkbox"]:checked::before {
+            left: 25px;
+            background: #0ff;
+            box-shadow: 0 0 10px #0ff;
+        }
+
+        .metrics-cyber {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .metric-cyber {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #0ff;
+            padding: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-cyber::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, #0ff, #f0f);
+        }
+
+        .metric-label-cyber {
+            color: #f0f;
+            font-size: 10px;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .metric-value-cyber {
+            color: #0ff;
+            font-size: 32px;
+            font-weight: 700;
+            text-shadow: 0 0 10px #0ff;
+            font-family: 'Courier New', monospace;
+        }
+
+        .metric-value-cyber.running {
+            color: #ff0;
+            text-shadow: 0 0 10px #ff0;
+            animation: neonPulse 1s infinite;
+        }
+
+        .metric-value-cyber.completed {
+            color: #0f0;
+            text-shadow: 0 0 10px #0f0;
+        }
+
+        .metric-value-cyber.failed {
+            color: #f00;
+            text-shadow: 0 0 10px #f00;
+        }
+
+        .progress-cyber {
+            margin-top: 20px;
+        }
+
+        .progress-info-cyber {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .progress-text-cyber {
+            color: #0ff;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        .progress-track-cyber {
+            height: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #0ff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill-cyber {
+            height: 100%;
+            background: linear-gradient(90deg, #0ff, #f0f);
+            transition: width 0.5s ease;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+        }
+
+        .progress-fill-cyber::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .log-cyber {
+            grid-column: 1 / -1;
+        }
+
+        .log-screen {
+            background: #000;
+            border: 2px solid #0ff;
+            padding: 15px;
+            height: 280px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.2);
+        }
+
+        .log-screen::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .log-screen::-webkit-scrollbar-track {
+            background: #000;
+            border: 1px solid #0ff;
+        }
+
+        .log-screen::-webkit-scrollbar-thumb {
+            background: #0ff;
+            box-shadow: 0 0 10px #0ff;
+        }
+
+        .log-line-cyber {
+            margin-bottom: 5px;
+            color: #0ff;
+        }
+
+        .log-time-cyber {
+            color: #f0f;
+            margin-right: 10px;
+        }
+
+        .log-text-cyber.success {
+            color: #0f0;
+        }
+
+        .log-text-cyber.error {
+            color: #f00;
+        }
+
+        .log-text-cyber.info {
+            color: #0ff;
+        }
+
+        .footer-cyber {
+            text-align: center;
+            color: #0ff;
+            font-size: 11px;
+            margin-top: 20px;
+            padding: 20px;
+            border-top: 1px solid rgba(0, 255, 255, 0.3);
+            letter-spacing: 2px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>◆ DATA MIGRATION TERMINAL ◆</h1>
+            <p>[ CYBERPUNK INTERFACE v2.0.77 ]</p>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Control Panel -->
+            <div class="terminal-panel control-full">
+                <div class="terminal-header">
+                    <span class="terminal-icon">■</span>
+                    <span class="terminal-title">[ SYSTEM CONTROL ]</span>
+                </div>
+                <div class="terminal-body">
+                    <button class="btn-cyber" id="startButton" onclick="startBatch()">
+                        ▶ EXECUTE MIGRATION
+                    </button>
+                    <div class="cyber-switch">
+                        <input type="checkbox" id="maskingCheckbox">
+                        <span class="switch-label-cyber">◆ DATA MASKING PROTOCOL</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Panel -->
+            <div class="terminal-panel">
+                <div class="terminal-header">
+                    <span class="terminal-icon">●</span>
+                    <span class="terminal-title">[ EXECUTION STATUS ]</span>
+                </div>
+                <div class="terminal-body">
+                    <div class="metrics-cyber">
+                        <div class="metric-cyber">
+                            <div class="metric-label-cyber">EXEC ID</div>
+                            <div class="metric-value-cyber" id="executionId">-</div>
+                        </div>
+                        <div class="metric-cyber">
+                            <div class="metric-label-cyber">STATUS</div>
+                            <div class="metric-value-cyber" id="status">IDLE</div>
+                        </div>
+                        <div class="metric-cyber">
+                            <div class="metric-label-cyber">READ</div>
+                            <div class="metric-value-cyber" id="readCount">0</div>
+                        </div>
+                        <div class="metric-cyber">
+                            <div class="metric-label-cyber">WRITE</div>
+                            <div class="metric-value-cyber" id="writeCount">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Panel -->
+            <div class="terminal-panel">
+                <div class="terminal-header">
+                    <span class="terminal-icon">▲</span>
+                    <span class="terminal-title">[ PROGRESS MONITOR ]</span>
+                </div>
+                <div class="terminal-body">
+                    <div class="progress-cyber">
+                        <div class="progress-info-cyber">
+                            <span class="progress-text-cyber">COMPLETION RATE</span>
+                            <span class="progress-text-cyber" id="progressPercentage">0%</span>
+                        </div>
+                        <div class="progress-track-cyber">
+                            <div class="progress-fill-cyber" id="progressBar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                    <div class="metrics-cyber" style="margin-top: 20px;">
+                        <div class="metric-cyber">
+                            <div class="metric-label-cyber">SKIP</div>
+                            <div class="metric-value-cyber" id="skipCount" style="color: #ff0; text-shadow: 0 0 10px #ff0;">0</div>
+                        </div>
+                        <div class="metric-cyber">
+                            <div class="metric-label-cyber">SUCCESS</div>
+                            <div class="metric-value-cyber" id="successRate" style="color: #0f0; text-shadow: 0 0 10px #0f0;">100%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Log Panel -->
+            <div class="terminal-panel log-cyber">
+                <div class="terminal-header">
+                    <span class="terminal-icon">◇</span>
+                    <span class="terminal-title">[ SYSTEM LOG ]</span>
+                </div>
+                <div class="terminal-body">
+                    <div class="log-screen" id="logArea"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer-cyber">
+            CYBERPUNK DATA MIGRATION v1.0.0 | NEURAL NETWORK ENABLED
+        </div>
+    </div>
+
+    <script>
+        let currentExecutionId = null;
+        let statusTimer = null;
+
+        function log(message, type = 'info') {
+            const logArea = document.getElementById('logArea');
+            const time = new Date().toLocaleTimeString('ja-JP');
+            const entry = document.createElement('div');
+            entry.className = 'log-line-cyber';
+
+            let textClass = 'log-text-cyber';
+            let icon = '>';
+
+            if (type === 'error') {
+                textClass = 'log-text-cyber error';
+                icon = '✖';
+            } else if (type === 'success') {
+                textClass = 'log-text-cyber success';
+                icon = '✔';
+            } else if (type === 'info') {
+                textClass = 'log-text-cyber info';
+                icon = '→';
+            }
+
+            entry.innerHTML = `<span class="log-time-cyber">[${time}]</span><span class="${textClass}">${icon} ${message}</span>`;
+            logArea.appendChild(entry);
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        async function startBatch() {
+            const startButton = document.getElementById('startButton');
+            const maskingCheckbox = document.getElementById('maskingCheckbox');
+
+            startButton.disabled = true;
+            maskingCheckbox.disabled = true;
+
+            log('INITIALIZING MIGRATION PROTOCOL...', 'info');
+
+            try {
+                const requestBody = maskingCheckbox.checked
+                    ? { maskingEnabled: 'true' }
+                    : {};
+
+                const response = await fetch('/api/batch/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentExecutionId = data.executionId;
+                    document.getElementById('executionId').textContent = currentExecutionId;
+                    document.getElementById('status').textContent = 'RUNNING';
+                    document.getElementById('status').className = 'metric-value-cyber running';
+
+                    log(`MIGRATION STARTED [ID: ${currentExecutionId}]`, 'success');
+                    if (maskingCheckbox.checked) {
+                        log('DATA MASKING PROTOCOL: ACTIVE', 'info');
+                    }
+
+                    startStatusPolling();
+                } else {
+                    log(`ERROR: ${data.message}`, 'error');
+                    startButton.disabled = false;
+                    maskingCheckbox.disabled = false;
+                }
+            } catch (error) {
+                log(`CONNECTION ERROR: ${error.message}`, 'error');
+                startButton.disabled = false;
+                maskingCheckbox.disabled = false;
+            }
+        }
+
+        function startStatusPolling() {
+            if (statusTimer) {
+                clearInterval(statusTimer);
+            }
+
+            statusTimer = setInterval(updateStatus, 3000);
+        }
+
+        async function updateStatus() {
+            if (!currentExecutionId) return;
+
+            try {
+                const response = await fetch(`/api/batch/status/${currentExecutionId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const status = data.status;
+                    const statusElement = document.getElementById('status');
+                    statusElement.textContent = status;
+
+                    if (status === 'COMPLETED') {
+                        statusElement.className = 'metric-value-cyber completed';
+                        document.getElementById('progressBar').style.width = '100%';
+                        document.getElementById('progressPercentage').textContent = '100%';
+                        document.getElementById('startButton').disabled = false;
+                        document.getElementById('maskingCheckbox').disabled = false;
+                        log('MIGRATION COMPLETED SUCCESSFULLY', 'success');
+                        clearInterval(statusTimer);
+                    } else if (status === 'FAILED') {
+                        statusElement.className = 'metric-value-cyber failed';
+                        document.getElementById('startButton').disabled = false;
+                        document.getElementById('maskingCheckbox').disabled = false;
+                        log('MIGRATION FAILED - SYSTEM ERROR', 'error');
+                        clearInterval(statusTimer);
+                    } else if (status === 'STARTED' || status === 'STARTING') {
+                        statusElement.className = 'metric-value-cyber running';
+                        const currentWidth = parseInt(document.getElementById('progressBar').style.width) || 0;
+                        if (currentWidth < 90) {
+                            const newWidth = currentWidth + 5;
+                            document.getElementById('progressBar').style.width = newWidth + '%';
+                            document.getElementById('progressPercentage').textContent = newWidth + '%';
+                        }
+                    }
+
+                    if (data.totalReadCount !== undefined) {
+                        document.getElementById('readCount').textContent = data.totalReadCount.toLocaleString();
+                    }
+                    if (data.totalWriteCount !== undefined) {
+                        document.getElementById('writeCount').textContent = data.totalWriteCount.toLocaleString();
+                    }
+                    if (data.totalSkipCount !== undefined) {
+                        document.getElementById('skipCount').textContent = data.totalSkipCount.toLocaleString();
+                    }
+
+                    const readCount = data.totalReadCount || 0;
+                    const skipCount = data.totalSkipCount || 0;
+                    if (readCount > 0) {
+                        const successRate = ((readCount - skipCount) / readCount * 100).toFixed(1);
+                        document.getElementById('successRate').textContent = successRate + '%';
+                    }
+                }
+            } catch (error) {
+                // Silent error
+            }
+        }
+
+        window.onload = function() {
+            log('CYBERPUNK TERMINAL ONLINE', 'success');
+            log('AWAITING MIGRATION COMMAND...', 'info');
+            log('NEURAL NETWORK: READY', 'success');
+        };
+    </script>
+</body>
+</html>

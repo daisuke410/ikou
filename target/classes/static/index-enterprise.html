@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Migration Console - Enterprise Edition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: #0c111b;
+            color: #d4d9e1;
+            min-height: 100vh;
+            padding: 28px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(90deg, #1a2332 0%, #0f1621 100%);
+            border-left: 5px solid #0ea5e9;
+            padding: 24px 32px;
+            margin-bottom: 28px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .brand-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 900;
+            color: #fff;
+        }
+
+        .brand-text h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #d4d9e1;
+            margin-bottom: 4px;
+        }
+
+        .brand-text p {
+            font-size: 12px;
+            color: #7d8694;
+            font-weight: 600;
+        }
+
+        .status-indicators {
+            display: flex;
+            gap: 24px;
+        }
+
+        .indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 18px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid #2a3441;
+        }
+
+        .indicator-dot {
+            width: 10px;
+            height: 10px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .indicator-text {
+            font-size: 13px;
+            font-weight: 600;
+            color: #7d8694;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 28px;
+        }
+
+        .box {
+            background: #151c2a;
+            border: 1px solid #2a3441;
+        }
+
+        .box-top {
+            background: #1a2332;
+            border-bottom: 2px solid #0ea5e9;
+            padding: 18px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .box-heading {
+            font-size: 15px;
+            font-weight: 700;
+            color: #d4d9e1;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+        }
+
+        .box-badge {
+            background: #0ea5e9;
+            color: #fff;
+            padding: 4px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .box-content {
+            padding: 28px;
+        }
+
+        .wide {
+            grid-column: 1 / -1;
+        }
+
+        .action-zone {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .btn-exec {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            border: none;
+            color: #ffffff;
+            padding: 16px 42px;
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 14px rgba(14, 165, 233, 0.4);
+        }
+
+        .btn-exec:hover:not(:disabled) {
+            background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .btn-exec:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .option-box {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 22px;
+            background: rgba(14, 165, 233, 0.05);
+            border: 1px solid rgba(14, 165, 233, 0.2);
+        }
+
+        .checkbox-ent {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #4a5564;
+            background: #0c111b;
+            cursor: pointer;
+            position: relative;
+            appearance: none;
+            transition: all 0.2s;
+        }
+
+        .checkbox-ent:checked {
+            background: #0ea5e9;
+            border-color: #0ea5e9;
+        }
+
+        .checkbox-ent:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 900;
+        }
+
+        .option-text {
+            color: #a3aab5;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .stats-layout {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .stat {
+            background: #0c111b;
+            border-left: 4px solid #4a5564;
+            padding: 22px;
+        }
+
+        .stat-title {
+            color: #7d8694;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 14px;
+        }
+
+        .stat-figure {
+            color: #d4d9e1;
+            font-size: 38px;
+            font-weight: 900;
+            font-family: 'Consolas', monospace;
+        }
+
+        .stat-figure.live {
+            color: #0ea5e9;
+        }
+
+        .stat-figure.ok {
+            color: #10b981;
+        }
+
+        .stat-figure.bad {
+            color: #ef4444;
+        }
+
+        .progress-area {
+            margin-top: 28px;
+        }
+
+        .progress-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .progress-name {
+            color: #7d8694;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .progress-perc {
+            color: #0ea5e9;
+            font-size: 16px;
+            font-weight: 900;
+        }
+
+        .progress-outer {
+            height: 14px;
+            background: #0c111b;
+            border: 1px solid #2a3441;
+            overflow: hidden;
+        }
+
+        .progress-inner {
+            height: 100%;
+            background: linear-gradient(90deg, #0ea5e9 0%, #38bdf8 100%);
+            transition: width 0.5s ease;
+            box-shadow: 0 0 16px rgba(14, 165, 233, 0.8);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+            margin-top: 24px;
+        }
+
+        .summary-item {
+            background: #0c111b;
+            border: 1px solid #2a3441;
+            padding: 18px;
+        }
+
+        .summary-label {
+            color: #7d8694;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 10px;
+        }
+
+        .summary-number {
+            color: #d4d9e1;
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .summary-number.alert {
+            color: #f59e0b;
+        }
+
+        .summary-number.positive {
+            color: #10b981;
+        }
+
+        .log-view {
+            background: #0c111b;
+            border: 1px solid #2a3441;
+            padding: 22px;
+            height: 350px;
+            overflow-y: auto;
+            font-family: 'Consolas', monospace;
+            font-size: 13px;
+            line-height: 1.9;
+        }
+
+        .log-view::-webkit-scrollbar {
+            width: 14px;
+        }
+
+        .log-view::-webkit-scrollbar-track {
+            background: #151c2a;
+        }
+
+        .log-view::-webkit-scrollbar-thumb {
+            background: #2a3441;
+            border: 3px solid #151c2a;
+        }
+
+        .log-view::-webkit-scrollbar-thumb:hover {
+            background: #3a4551;
+        }
+
+        .log-row {
+            margin-bottom: 6px;
+            color: #7d8694;
+        }
+
+        .log-stamp {
+            color: #4a5564;
+            margin-right: 14px;
+        }
+
+        .log-msg.ok {
+            color: #10b981;
+        }
+
+        .log-msg.fail {
+            color: #ef4444;
+        }
+
+        .log-msg.note {
+            color: #0ea5e9;
+        }
+
+        .footer-area {
+            text-align: center;
+            color: #4a5564;
+            font-size: 13px;
+            margin-top: 28px;
+            padding: 24px;
+            border-top: 1px solid #2a3441;
+        }
+
+        @media (max-width: 1200px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="brand">
+                <div class="brand-icon">D</div>
+                <div class="brand-text">
+                    <h1>Data Migration Console</h1>
+                    <p>Enterprise Edition v1.0.0</p>
+                </div>
+            </div>
+            <div class="status-indicators">
+                <div class="indicator">
+                    <div class="indicator-dot"></div>
+                    <span class="indicator-text">System Online</span>
+                </div>
+                <div class="indicator">
+                    <span class="indicator-text">Spring Batch</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Layout -->
+        <div class="layout">
+            <!-- Control Box -->
+            <div class="box wide">
+                <div class="box-top">
+                    <div class="box-heading">◆ Execution Control</div>
+                    <div class="box-badge">ACTIVE</div>
+                </div>
+                <div class="box-content">
+                    <div class="action-zone">
+                        <button class="btn-exec" id="startButton" onclick="startBatch()">
+                            Execute Migration
+                        </button>
+                        <div class="option-box">
+                            <input type="checkbox" class="checkbox-ent" id="maskingCheckbox">
+                            <span class="option-text">Enable Data Masking Protocol</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Box -->
+            <div class="box">
+                <div class="box-top">
+                    <div class="box-heading">◆ Status Monitor</div>
+                </div>
+                <div class="box-content">
+                    <div class="stats-layout">
+                        <div class="stat">
+                            <div class="stat-title">Execution ID</div>
+                            <div class="stat-figure" id="executionId">-</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-title">Status</div>
+                            <div class="stat-figure" id="status">IDLE</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-title">Read Count</div>
+                            <div class="stat-figure" id="readCount">0</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-title">Write Count</div>
+                            <div class="stat-figure" id="writeCount">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Box -->
+            <div class="box">
+                <div class="box-top">
+                    <div class="box-heading">◆ Progress Tracking</div>
+                </div>
+                <div class="box-content">
+                    <div class="progress-area">
+                        <div class="progress-details">
+                            <span class="progress-name">Overall Progress</span>
+                            <span class="progress-perc" id="progressPercentage">0%</span>
+                        </div>
+                        <div class="progress-outer">
+                            <div class="progress-inner" id="progressBar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <div class="summary-label">Skip Count</div>
+                            <div class="summary-number alert" id="skipCount">0</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">Success Rate</div>
+                            <div class="summary-number positive" id="successRate">100%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Log Box -->
+            <div class="box wide">
+                <div class="box-top">
+                    <div class="box-heading">◆ Activity Log</div>
+                </div>
+                <div class="box-content">
+                    <div class="log-view" id="logArea"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer-area">
+            Enterprise Data Migration Console | Powered by Spring Batch Framework
+        </div>
+    </div>
+
+    <script>
+        let currentExecutionId = null;
+        let statusTimer = null;
+
+        function log(message, type = 'info') {
+            const logArea = document.getElementById('logArea');
+            const time = new Date().toLocaleTimeString('ja-JP');
+            const entry = document.createElement('div');
+            entry.className = 'log-row';
+
+            let msgClass = 'log-msg';
+            let symbol = '▸';
+
+            if (type === 'error') {
+                msgClass = 'log-msg fail';
+                symbol = '✕';
+            } else if (type === 'success') {
+                msgClass = 'log-msg ok';
+                symbol = '✓';
+            } else if (type === 'info') {
+                msgClass = 'log-msg note';
+                symbol = '●';
+            }
+
+            entry.innerHTML = `<span class="log-stamp">[${time}]</span><span class="${msgClass}">${symbol} ${message}</span>`;
+            logArea.appendChild(entry);
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        async function startBatch() {
+            const startButton = document.getElementById('startButton');
+            const maskingCheckbox = document.getElementById('maskingCheckbox');
+
+            startButton.disabled = true;
+            maskingCheckbox.disabled = true;
+
+            log('Initializing migration process...', 'info');
+
+            try {
+                const requestBody = maskingCheckbox.checked
+                    ? { maskingEnabled: 'true' }
+                    : {};
+
+                const response = await fetch('/api/batch/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentExecutionId = data.executionId;
+                    document.getElementById('executionId').textContent = currentExecutionId;
+                    document.getElementById('status').textContent = 'RUNNING';
+                    document.getElementById('status').className = 'stat-figure live';
+
+                    log(`Migration started successfully (ID: ${currentExecutionId})`, 'success');
+                    if (maskingCheckbox.checked) {
+                        log('Data masking protocol enabled', 'info');
+                    }
+
+                    startStatusPolling();
+                } else {
+                    log(`Failed to start migration: ${data.message}`, 'error');
+                    startButton.disabled = false;
+                    maskingCheckbox.disabled = false;
+                }
+            } catch (error) {
+                log(`System error: ${error.message}`, 'error');
+                startButton.disabled = false;
+                maskingCheckbox.disabled = false;
+            }
+        }
+
+        function startStatusPolling() {
+            if (statusTimer) {
+                clearInterval(statusTimer);
+            }
+
+            statusTimer = setInterval(updateStatus, 3000);
+        }
+
+        async function updateStatus() {
+            if (!currentExecutionId) return;
+
+            try {
+                const response = await fetch(`/api/batch/status/${currentExecutionId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const status = data.status;
+                    const statusElement = document.getElementById('status');
+                    statusElement.textContent = status;
+
+                    if (status === 'COMPLETED') {
+                        statusElement.className = 'stat-figure ok';
+                        document.getElementById('progressBar').style.width = '100%';
+                        document.getElementById('progressPercentage').textContent = '100%';
+                        document.getElementById('startButton').disabled = false;
+                        document.getElementById('maskingCheckbox').disabled = false;
+                        log('Migration completed successfully', 'success');
+                        clearInterval(statusTimer);
+                    } else if (status === 'FAILED') {
+                        statusElement.className = 'stat-figure bad';
+                        document.getElementById('startButton').disabled = false;
+                        document.getElementById('maskingCheckbox').disabled = false;
+                        log('Migration failed - check error details', 'error');
+                        clearInterval(statusTimer);
+                    } else if (status === 'STARTED' || status === 'STARTING') {
+                        statusElement.className = 'stat-figure live';
+                        const currentWidth = parseInt(document.getElementById('progressBar').style.width) || 0;
+                        if (currentWidth < 90) {
+                            const newWidth = currentWidth + 5;
+                            document.getElementById('progressBar').style.width = newWidth + '%';
+                            document.getElementById('progressPercentage').textContent = newWidth + '%';
+                        }
+                    }
+
+                    if (data.totalReadCount !== undefined) {
+                        document.getElementById('readCount').textContent = data.totalReadCount.toLocaleString();
+                    }
+                    if (data.totalWriteCount !== undefined) {
+                        document.getElementById('writeCount').textContent = data.totalWriteCount.toLocaleString();
+                    }
+                    if (data.totalSkipCount !== undefined) {
+                        document.getElementById('skipCount').textContent = data.totalSkipCount.toLocaleString();
+                    }
+
+                    const readCount = data.totalReadCount || 0;
+                    const skipCount = data.totalSkipCount || 0;
+                    if (readCount > 0) {
+                        const successRate = ((readCount - skipCount) / readCount * 100).toFixed(1);
+                        document.getElementById('successRate').textContent = successRate + '%';
+                    }
+                }
+            } catch (error) {
+                // Silent error
+            }
+        }
+
+        window.onload = function() {
+            log('Enterprise console initialized', 'success');
+            log('System ready for migration execution', 'info');
+        };
+    </script>
+</body>
+</html>

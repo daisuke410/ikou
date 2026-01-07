@@ -1,0 +1,24 @@
+# テスト環境用の設定ファイル
+# 使用方法: java -jar app.jar --spring.profiles.active=test
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5434/testdb
+    username: postgres
+    password: password
+
+# バッチ処理固有の設定（テスト環境）
+batch:
+  # マスク処理を有効化
+  masking:
+    enabled: true  # テスト環境ではマスク処理を有効化
+    mask-email: true
+    mask-phone: true
+    mask-address: true
+    mask-postal-code: true
+
+# ロギング設定（テスト環境では詳細ログを出力）
+logging:
+  level:
+    com.example.batch: DEBUG
+    com.example.batch.processor.DataMaskingProcessor: DEBUG

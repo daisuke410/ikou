@@ -1,0 +1,26 @@
+セクション,項目,値
+ジョブ情報,ジョブID,58
+ジョブ情報,ジョブ名,dataMigrationJob
+ジョブ情報,ステータス,FAILED
+ジョブ情報,終了コード,FAILED
+実行時間,開始時刻,2025-12-31 23:20:09
+実行時間,終了時刻,2025-12-31 23:20:09
+実行時間,処理時間(秒),0
+実行時間,処理時間(ミリ秒),96
+ステップ1(customerMigrationStep),ステータス,FAILED
+ステップ1(customerMigrationStep),読み込み件数,20
+ステップ1(customerMigrationStep),書き込み件数,0
+ステップ1(customerMigrationStep),読み込みスキップ件数,0
+ステップ1(customerMigrationStep),処理スキップ件数,0
+ステップ1(customerMigrationStep),書き込みスキップ件数,10
+ステップ1(customerMigrationStep),スキップ合計,10
+ステップ1(customerMigrationStep),コミット回数,0
+ステップ1(customerMigrationStep),ロールバック回数,12
+ステップ1(customerMigrationStep),処理時間(秒),0
+ステップ1(customerMigrationStep),処理速度(件/秒),0.00
+ステップ1(customerMigrationStep),エラー内容,"Skip limit of '10' exceeded"
+サマリー,総読み込み件数,20
+サマリー,総書き込み件数,0
+サマリー,総スキップ件数,10
+サマリー,全体処理速度(件/秒),0.00
+サマリー,成功率(%),50.00

@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Migration Neon - Retro Synthwave</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes neonGlow {
+            0%, 100% {
+                box-shadow:
+                    0 0 5px #ff00ff,
+                    0 0 10px #ff00ff,
+                    0 0 20px #ff00ff,
+                    0 0 40px #ff00ff;
+            }
+            50% {
+                box-shadow:
+                    0 0 10px #ff00ff,
+                    0 0 20px #ff00ff,
+                    0 0 30px #ff00ff,
+                    0 0 50px #ff00ff,
+                    0 0 60px #ff00ff;
+            }
+        }
+
+        @keyframes gridMove {
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(50px); }
+        }
+
+        body {
+            font-family: 'Orbitron', 'Arial Black', sans-serif;
+            background: linear-gradient(180deg, #0a0015 0%, #1a0033 50%, #0a0015 100%);
+            color: #ff00ff;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150%;
+            height: 500px;
+            background:
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 50px,
+                    rgba(255, 0, 255, 0.15) 50px,
+                    rgba(255, 0, 255, 0.15) 51px
+                );
+            transform-origin: center bottom;
+            animation: gridMove 3s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.7);
+            border: 3px solid #ff00ff;
+            border-radius: 15px;
+            padding: 30px 40px;
+            margin-bottom: 30px;
+            box-shadow:
+                0 0 20px #ff00ff,
+                0 0 40px rgba(255, 0, 255, 0.5),
+                inset 0 0 20px rgba(255, 0, 255, 0.1);
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .header h1 {
+            font-size: 42px;
+            font-weight: 900;
+            background: linear-gradient(90deg, #ff00ff, #00ffff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            animation: neonGlow 2s infinite;
+        }
+
+        .header p {
+            color: #00ffff;
+            font-size: 16px;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .grid-neon {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+        }
+
+        .card-neon {
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid;
+            border-radius: 15px;
+            padding: 0;
+            box-shadow: 0 0 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-neon.pink {
+            border-color: #ff00ff;
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.5);
+        }
+
+        .card-neon.cyan {
+            border-color: #00ffff;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        }
+
+        .card-neon::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 30%,
+                rgba(255, 0, 255, 0.1) 50%,
+                transparent 70%
+            );
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .card-header-neon {
+            background: linear-gradient(135deg,
+                rgba(255, 0, 255, 0.3),
+                rgba(0, 255, 255, 0.3)
+            );
+            border-bottom: 2px solid #ff00ff;
+            padding: 18px 25px;
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #fff;
+            text-shadow: 0 0 10px #ff00ff;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-body-neon {
+            padding: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .full-neon {
+            grid-column: 1 / -1;
+        }
+
+        .btn-neon {
+            background: linear-gradient(135deg, #ff00ff, #ff0080);
+            border: none;
+            color: #fff;
+            padding: 18px 45px;
+            font-family: inherit;
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 50px;
+            box-shadow:
+                0 0 20px #ff00ff,
+                0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-neon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-neon:hover:not(:disabled)::before {
+            left: 100%;
+        }
+
+        .btn-neon:hover:not(:disabled) {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow:
+                0 0 40px #ff00ff,
+                0 0 60px rgba(255, 0, 255, 0.5),
+                0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-neon:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .switch-neon {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .switch-toggle {
+            position: relative;
+            width: 70px;
+            height: 34px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #00ffff;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        .switch-toggle input {
+            display: none;
+        }
+
+        .switch-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: #00ffff;
+            border-radius: 50%;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px #00ffff;
+        }
+
+        input:checked + .switch-slider {
+            left: 39px;
+            background: #ff00ff;
+            box-shadow: 0 0 15px #ff00ff;
+        }
+
+        .switch-label-neon {
+            color: #00ffff;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .metrics-neon {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .metric-neon {
+            background: linear-gradient(135deg,
+                rgba(255, 0, 255, 0.1),
+                rgba(0, 255, 255, 0.1)
+            );
+            border: 2px solid #ff00ff;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
+        }
+
+        .metric-label-neon {
+            color: #00ffff;
+            font-size: 12px;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            text-shadow: 0 0 5px #00ffff;
+        }
+
+        .metric-value-neon {
+            color: #ff00ff;
+            font-size: 40px;
+            font-weight: 900;
+            text-shadow: 0 0 20px #ff00ff;
+        }
+
+        .metric-value-neon.running {
+            animation: neonGlow 1s infinite;
+        }
+
+        .metric-value-neon.completed {
+            color: #00ff00;
+            text-shadow: 0 0 20px #00ff00;
+        }
+
+        .metric-value-neon.failed {
+            color: #ff0000;
+            text-shadow: 0 0 20px #ff0000;
+        }
+
+        .progress-neon {
+            margin-top: 25px;
+        }
+
+        .progress-info-neon {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            color: #00ffff;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .progress-track-neon {
+            height: 30px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 3px solid #ff00ff;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .progress-fill-neon {
+            height: 100%;
+            background: linear-gradient(90deg, #ff00ff, #00ffff, #ff00ff);
+            background-size: 200% 100%;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.8);
+            animation: gradientFlow 3s linear infinite;
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        .log-neon {
+            background: #000;
+            border: 3px solid #00ffff;
+            border-radius: 10px;
+            padding: 20px;
+            height: 320px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.8;
+            box-shadow:
+                0 0 25px rgba(0, 255, 255, 0.5),
+                inset 0 0 20px rgba(0, 255, 255, 0.1);
+        }
+
+        .log-neon::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .log-neon::-webkit-scrollbar-track {
+            background: #000;
+            border: 1px solid #00ffff;
+            border-radius: 10px;
+        }
+
+        .log-neon::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #ff00ff, #00ffff);
+            border-radius: 10px;
+            box-shadow: 0 0 10px #ff00ff;
+        }
+
+        .log-entry-neon {
+            margin-bottom: 8px;
+            color: #00ffff;
+        }
+
+        .log-time-neon {
+            color: #ff00ff;
+            margin-right: 15px;
+        }
+
+        .log-msg-neon.success {
+            color: #00ff00;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        .log-msg-neon.error {
+            color: #ff0000;
+            text-shadow: 0 0 5px #ff0000;
+        }
+
+        .footer-neon {
+            text-align: center;
+            color: #ff00ff;
+            font-size: 14px;
+            margin-top: 30px;
+            padding: 25px;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px #ff00ff;
+        }
+
+        @media (max-width: 1024px) {
+            .grid-neon {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>◈ NEON MIGRATION ◈</h1>
+            <p>▸ RETRO SYNTHWAVE INTERFACE ▸</p>
+        </div>
+
+        <!-- Grid -->
+        <div class="grid-neon">
+            <!-- Control Panel -->
+            <div class="card-neon pink full-neon">
+                <div class="card-header-neon">◆ CONTROL CENTER ◆</div>
+                <div class="card-body-neon">
+                    <button class="btn-neon" id="startButton" onclick="startBatch()">
+                        ▶ START MIGRATION
+                    </button>
+                    <div class="switch-neon">
+                        <label class="switch-toggle">
+                            <input type="checkbox" id="maskingCheckbox">
+                            <span class="switch-slider"></span>
+                        </label>
+                        <span class="switch-label-neon">◈ DATA MASKING MODE</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Panel -->
+            <div class="card-neon cyan">
+                <div class="card-header-neon">◆ STATUS DISPLAY ◆</div>
+                <div class="card-body-neon">
+                    <div class="metrics-neon">
+                        <div class="metric-neon">
+                            <div class="metric-label-neon">EXEC ID</div>
+                            <div class="metric-value-neon" id="executionId">-</div>
+                        </div>
+                        <div class="metric-neon">
+                            <div class="metric-label-neon">STATUS</div>
+                            <div class="metric-value-neon" id="status">IDLE</div>
+                        </div>
+                        <div class="metric-neon">
+                            <div class="metric-label-neon">READ</div>
+                            <div class="metric-value-neon" id="readCount">0</div>
+                        </div>
+                        <div class="metric-neon">
+                            <div class="metric-label-neon">WRITE</div>
+                            <div class="metric-value-neon" id="writeCount">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Panel -->
+            <div class="card-neon pink">
+                <div class="card-header-neon">◆ PROGRESS TRACKER ◆</div>
+                <div class="card-body-neon">
+                    <div class="progress-neon">
+                        <div class="progress-info-neon">
+                            <span>COMPLETION</span>
+                            <span id="progressPercentage">0%</span>
+                        </div>
+                        <div class="progress-track-neon">
+                            <div class="progress-fill-neon" id="progressBar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                    <div class="metrics-neon" style="margin-top: 25px;">
+                        <div class="metric-neon">
+                            <div class="metric-label-neon">SKIP</div>
+                            <div class="metric-value-neon" id="skipCount">0</div>
+                        </div>
+                        <div class="metric-neon">
+                            <div class="metric-label-neon">SUCCESS</div>
+                            <div class="metric-value-neon" id="successRate">100%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Log Panel -->
+            <div class="card-neon cyan full-neon">
+                <div class="card-header-neon">◆ SYSTEM LOG ◆</div>
+                <div class="card-body-neon">
+                    <div class="log-neon" id="logArea"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer-neon">
+            ◈ NEON MIGRATION SYSTEM v1.0.0 | SYNTHWAVE PROTOCOL ◈
+        </div>
+    </div>
+
+    <script>
+        let currentExecutionId = null;
+        let statusTimer = null;
+
+        function log(message, type = 'info') {
+            const logArea = document.getElementById('logArea');
+            const time = new Date().toLocaleTimeString('ja-JP');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry-neon';
+
+            let msgClass = 'log-msg-neon';
+            let icon = '▸';
+
+            if (type === 'error') {
+                msgClass = 'log-msg-neon error';
+                icon = '✖';
+            } else if (type === 'success') {
+                msgClass = 'log-msg-neon success';
+                icon = '✔';
+            }
+
+            entry.innerHTML = `<span class="log-time-neon">[${time}]</span><span class="${msgClass}">${icon} ${message}</span>`;
+            logArea.appendChild(entry);
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        async function startBatch() {
+            const startButton = document.getElementById('startButton');
+            const maskingCheckbox = document.getElementById('maskingCheckbox');
+
+            startButton.disabled = true;
+            maskingCheckbox.disabled = true;
+
+            log('ENGAGING MIGRATION PROTOCOL...', 'info');
+
+            try {
+                const requestBody = maskingCheckbox.checked
+                    ? { maskingEnabled: 'true' }
+                    : {};
+
+                const response = await fetch('/api/batch/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentExecutionId = data.executionId;
+                    document.getElementById('executionId').textContent = currentExecutionId;
+                    document.getElementById('status').textContent = 'ACTIVE';
+                    document.getElementById('status').className = 'metric-value-neon running';
+
+                    log(`MIGRATION ACTIVE [ID:${currentExecutionId}]`, 'success');
+                    if (maskingCheckbox.checked) {
+                        log('DATA MASKING: ENABLED', 'info');
+                    }
+
+                    startStatusPolling();
+                } else {
+                    log(`ERROR: ${data.message}`, 'error');
+                    startButton.disabled = false;
+                    maskingCheckbox.disabled = false;
+                }
+            } catch (error) {
+                log(`CONNECTION ERROR: ${error.message}`, 'error');
+                startButton.disabled = false;
+                maskingCheckbox.disabled = false;
+            }
+        }
+
+        function startStatusPolling() {
+            if (statusTimer) {
+                clearInterval(statusTimer);
+            }
+
+            statusTimer = setInterval(updateStatus, 3000);
+        }
+
+        async function updateStatus() {
+            if (!currentExecutionId) return;
+
+            try {
+                const response = await fetch(`/api/batch/status/${currentExecutionId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const status = data.status;
+                    const statusElement = document.getElementById('status');
+                    statusElement.textContent = status;
+
+                    if (status === 'COMPLETED') {
+                        statusElement.className = 'metric-value-neon completed';
+                        document.getElementById('progressBar').style.width = '100%';
+                        document.getElementById('progressPercentage').textContent = '100%';
+                        document.getElementById('startButton').disabled = false;
+                        document.getElementById('maskingCheckbox').disabled = false;
+                        log('MIGRATION COMPLETE', 'success');
+                        clearInterval(statusTimer);
+                    } else if (status === 'FAILED') {
+                        statusElement.className = 'metric-value-neon failed';
+                        document.getElementById('startButton').disabled = false;
+                        document.getElementById('maskingCheckbox').disabled = false;
+                        log('MIGRATION FAILED', 'error');
+                        clearInterval(statusTimer);
+                    } else if (status === 'STARTED' || status === 'STARTING') {
+                        statusElement.className = 'metric-value-neon running';
+                        const currentWidth = parseInt(document.getElementById('progressBar').style.width) || 0;
+                        if (currentWidth < 90) {
+                            const newWidth = currentWidth + 5;
+                            document.getElementById('progressBar').style.width = newWidth + '%';
+                            document.getElementById('progressPercentage').textContent = newWidth + '%';
+                        }
+                    }
+
+                    if (data.totalReadCount !== undefined) {
+                        document.getElementById('readCount').textContent = data.totalReadCount.toLocaleString();
+                    }
+                    if (data.totalWriteCount !== undefined) {
+                        document.getElementById('writeCount').textContent = data.totalWriteCount.toLocaleString();
+                    }
+                    if (data.totalSkipCount !== undefined) {
+                        document.getElementById('skipCount').textContent = data.totalSkipCount.toLocaleString();
+                    }
+
+                    const readCount = data.totalReadCount || 0;
+                    const skipCount = data.totalSkipCount || 0;
+                    if (readCount > 0) {
+                        const successRate = ((readCount - skipCount) / readCount * 100).toFixed(1);
+                        document.getElementById('successRate').textContent = successRate + '%';
+                    }
+                }
+            } catch (error) {
+                // Silent error
+            }
+        }
+
+        window.onload = function() {
+            log('NEON INTERFACE INITIALIZED', 'success');
+            log('SYNTHWAVE PROTOCOL READY', 'success');
+            log('AWAITING COMMAND...', 'info');
+        };
+    </script>
+</body>
+</html>

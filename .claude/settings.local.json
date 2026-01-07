@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python scripts/generate-entity-from-ddl.py:*)",
+      "Bash(powershell:*)",
+      "Bash(javac:*)",
+      "Bash(java:*)",
+      "Bash(where:*)",
+      "Bash(mvn clean:*)",
+      "Bash(mvn compile:*)",
+      "Bash(ren:*)",
+      "Bash(ren RetryListener.java CustomRetryListener.java)",
+      "Bash(findstr:*)",
+      "Bash(move SkipListener.java CustomSkipListener.java)",
+      "Bash(move RetryListener.java CustomRetryListener.java)",
+      "Bash(mvn package:*)",
+      "Bash(dir:*)",
+      "Bash(copy /Y scriptsrun-offline.bat \"dist\\offline-complete\\scripts\"\" && copy /Y scripts\\run-offline-ui.bat \"distoffline-completescripts\"\")",
+      "Bash(copy /Y scriptsshow-report-offline.bat \"dist\\offline-complete\\scripts\"\")"
+    ]
+  }
+}

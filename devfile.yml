@@ -4,11 +4,34 @@ metadata:
   version: 1.0.0
   displayName: Spring Boot Java 21 Application
   description: Spring Boot batch application with Java 21 for Kubernetes
+  tags:
+    - Java
+    - Spring Boot
+    - Maven
+    - PostgreSQL
+    - Batch
+  projectType: springboot
+  language: java
+  website: https://spring.io/projects/spring-boot
+  attributes:
+    # Eclipse CheでのGitLab連携に関する属性
+    # 実際のGitLab URLに置き換えてください
+    # projectCloneURL: https://gitlab.company.com/your-group/ikou.git
 
 # 親Devfileの参照（オプション - 社内環境で使用可能な場合）
 # parent:
 #   id: java-maven
 #   registryUrl: https://your-internal-registry/devfiles
+
+# プロジェクトのソース設定（GitLabリポジトリ）
+# Eclipse CheがGitLabから自動的にクローンする際に使用されます
+# projects:
+#   - name: ikou
+#     git:
+#       remotes:
+#         origin: https://gitlab.company.com/your-group/ikou.git
+#       checkoutFrom:
+#         revision: main
 
 components:
   # メインの開発コンテナ（Java 21 + Maven）

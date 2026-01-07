@@ -78,11 +78,58 @@ Devfile v2.2.0形式の設定ファイルで、以下を定義しています：
 
 ## ワークスペースの作成と起動
 
-### Eclipse Cheの場合
+### GitLabから直接起動（推奨）
 
-1. Eclipse Cheのダッシュボードにアクセス
+社内環境でEclipse CheとGitLabが連携されている場合、最も簡単な方法です。
+
+#### 方法1: GitLab UIから起動
+
+1. GitLabのプロジェクトページにアクセス
+2. 「Web IDE」または「Eclipse Che」ボタンをクリック
+3. ワークスペースが自動的に作成・起動されます
+4. `devfile.yml`が自動検出され、環境が構築されます
+
+#### 方法2: URLから直接起動
+
+GitLabリポジトリのURLを使用してEclipse Cheワークスペースを起動：
+
+```
+https://your-che-server.company.com/#https://gitlab.company.com/your-group/ikou
+```
+
+URLのパターン：
+```
+https://<Eclipse-Che-URL>/#<GitLab-Repository-URL>
+```
+
+#### 特定のブランチを指定して起動
+
+```
+https://your-che-server.company.com/#https://gitlab.company.com/your-group/ikou?branch=feature-branch
+```
+
+#### 特定のコミットを指定して起動
+
+```
+https://your-che-server.company.com/#https://gitlab.company.com/your-group/ikou?commit=abc123def
+```
+
+#### devfileのパスを明示的に指定
+
+プロジェクトルート以外にdevfileがある場合：
+
+```
+https://your-che-server.company.com/#https://gitlab.company.com/your-group/ikou?devfile=.devfiles/devfile.yml
+```
+
+### Eclipse Che ダッシュボードから起動
+
+1. Eclipse Cheのダッシュボードにアクセス（例: https://your-che-server.company.com）
 2. 「Workspaces」→「Create Workspace」
-3. GitリポジトリのURLを入力
+3. GitLabリポジトリのURLを入力
+   ```
+   https://gitlab.company.com/your-group/ikou
+   ```
 4. devfile.ymlが自動検出されます
 5. 「Create & Open」をクリック
 
@@ -90,14 +137,8 @@ Devfile v2.2.0形式の設定ファイルで、以下を定義しています：
 
 1. Dev Spacesのダッシュボードにアクセス
 2. 「Create Workspace」
-3. GitリポジトリのURLを入力、またはdevfile.ymlをアップロード
+3. GitLabリポジトリのURLを入力、またはdevfile.ymlをアップロード
 4. ワークスペースが自動的に作成・起動されます
-
-### URLから直接起動
-
-```
-https://your-che-server.company.com/#https://github.com/your-org/ikou
-```
 
 ## 開発ワークフロー
 
@@ -349,6 +390,75 @@ mvn -s settings.xml clean package
   exec:
     commandLine: mvn -s settings.xml clean package -DskipTests
 ```
+
+### Q: GitLabからEclipse Cheを起動したときに認証エラーが出る
+
+A: GitLabの個人アクセストークン（Personal Access Token）がEclipse Cheに設定されているか確認してください：
+
+1. GitLabで個人アクセストークンを生成（Scopes: `api`, `read_repository`, `write_repository`）
+2. Eclipse Cheのユーザー設定で「Git Providers」セクションに追加
+3. または、Eclipse Che管理者にGitLab OAuth連携の設定を依頼
+
+### Q: GitLabのプライベートリポジトリにアクセスできない
+
+A: Eclipse CheがGitLabのプライベートリポジトリにアクセスするには：
+
+1. **個人アクセストークン方式**:
+   - GitLabで個人アクセストークンを作成
+   - Eclipse Cheの設定に追加
+
+2. **SSH鍵方式**:
+   - Eclipse Cheワークスペース内でSSH鍵を生成
+   - 公開鍵をGitLabのプロフィールに追加
+
+3. **OAuth方式**（推奨）:
+   - 管理者がEclipse CheとGitLabのOAuth連携を設定済みの場合
+   - 初回アクセス時に自動的に認証フローが開始されます
+
+### Q: GitLabのマージリクエスト用のブランチで作業したい
+
+A: ブランチを指定してワークスペースを起動できます：
+
+```
+https://your-che-server.company.com/#https://gitlab.company.com/your-group/ikou?branch=feature/new-feature
+```
+
+または、ワークスペース内で通常のGit操作でブランチを切り替え：
+
+```bash
+git checkout -b feature/new-feature
+git push origin feature/new-feature
+```
+
+### Q: GitLab CI/CDと連携できますか？
+
+A: はい、可能です。以下のような連携パターンがあります：
+
+1. **マージリクエスト時の自動ビルド**:
+   - `.gitlab-ci.yml` でビルド・テストパイプラインを定義
+   - devfile.ymlと同じコマンドを使用可能
+
+2. **Eclipse Che環境でのテスト実行**:
+   - マージリクエストのブランチをEclipse Cheで開く
+   - ワークスペース内でテストを実行して確認
+
+3. **devfileを使用したCI環境**:
+   - GitLab Runnerでdevfile互換のツールを使用
+   - 一貫した開発・CI環境を実現
+
+### Q: devfile.ymlを更新した場合、既存のワークスペースに反映されますか？
+
+A: 既存のワークスペースには自動反映されません。以下の方法で更新できます：
+
+1. **ワークスペースの再作成**（推奨）:
+   - 既存のワークスペースを削除
+   - GitLabから新しいワークスペースを作成
+
+2. **ワークスペースの再起動**:
+   - 一部の変更（環境変数など）は再起動で反映される場合があります
+
+3. **手動での反映**:
+   - コンテナイメージの変更は反映されないため、ワークスペースの再作成が必要
 
 ## 問い合わせ
 

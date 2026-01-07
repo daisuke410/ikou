@@ -1,0 +1,236 @@
+schemaVersion: 2.2.0
+metadata:
+  name: spring-boot-java21
+  version: 1.0.0
+  displayName: Spring Boot Java 21 Application
+  description: Spring Boot batch application with Java 21 for Kubernetes
+  tags:
+    - Java
+    - Spring Boot
+    - Maven
+    - PostgreSQL
+    - Batch
+  projectType: springboot
+  language: java
+  website: https://spring.io/projects/spring-boot
+  attributes:
+    # Eclipse CheでのGitLab連携に関する属性
+    # 実際のGitLab URLに置き換えてください
+    # projectCloneURL: https://gitlab.company.com/your-group/ikou.git
+
+# 親Devfileの参照（オプション - 社内環境で使用可能な場合）
+# parent:
+#   id: java-maven
+#   registryUrl: https://your-internal-registry/devfiles
+
+# プロジェクトのソース設定（GitLabリポジトリ）
+# Eclipse CheがGitLabから自動的にクローンする際に使用されます
+# projects:
+#   - name: ikou
+#     git:
+#       remotes:
+#         origin: https://gitlab.company.com/your-group/ikou.git
+#       checkoutFrom:
+#         revision: main
+
+components:
+  # メインの開発コンテナ（Java 21 + Maven）
+  - name: tools
+    container:
+      # 社内のコンテナレジストリがある場合は、そのURLに置き換えてください
+      # 例: your-registry.company.com/eclipse-temurin:21-jdk
+      image: eclipse-temurin:21-jdk
+      memoryLimit: 2Gi
+      memoryRequest: 1Gi
+      cpuLimit: 2000m
+      cpuRequest: 1000m
+      mountSources: true
+      volumeMounts:
+        - name: m2
+          path: /home/user/.m2
+      env:
+        - name: JAVA_HOME
+          value: /opt/java/openjdk
+        - name: MAVEN_OPTS
+          value: -Xmx1024m -XX:+UseContainerSupport
+        - name: SPRING_PROFILES_ACTIVE
+          value: dev
+      endpoints:
+        - name: spring-boot
+          targetPort: 8080
+          exposure: public
+          protocol: http
+          attributes:
+            discoverable: true
+            urlRewriteSupported: true
+        - name: debug
+          targetPort: 5005
+          exposure: internal
+          protocol: tcp
+
+  # PostgreSQLデータベース
+  - name: postgres
+    container:
+      # 社内のコンテナレジストリがある場合は、そのURLに置き換えてください
+      image: postgres:15-alpine
+      memoryLimit: 512Mi
+      memoryRequest: 256Mi
+      cpuLimit: 500m
+      cpuRequest: 200m
+      env:
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          value: postgres
+        - name: POSTGRES_DB
+          value: migration_db
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+      volumeMounts:
+        - name: postgres-storage
+          path: /var/lib/postgresql/data
+      endpoints:
+        - name: postgres
+          targetPort: 5432
+          exposure: internal
+
+  # Mavenローカルリポジトリ用のボリューム
+  - name: m2
+    volume:
+      size: 3Gi
+
+  # PostgreSQLデータ永続化用のボリューム
+  - name: postgres-storage
+    volume:
+      size: 1Gi
+
+commands:
+  # 初期セットアップ
+  - id: init-workspace
+    exec:
+      component: tools
+      commandLine: |
+        echo "Initializing workspace..."
+        echo "Java version: $(java -version 2>&1 | head -n 1)"
+        echo "Maven version: $(mvn -version | head -n 1)"
+        echo "Downloading dependencies..."
+        mvn dependency:resolve dependency:resolve-plugins
+      workingDir: ${PROJECT_SOURCE}
+      group:
+        kind: build
+        isDefault: false
+
+  # アプリケーションのビルド
+  - id: maven-build
+    exec:
+      component: tools
+      commandLine: mvn clean package -DskipTests
+      workingDir: ${PROJECT_SOURCE}
+      group:
+        kind: build
+        isDefault: true
+
+  # 完全ビルド（テスト含む）
+  - id: maven-build-with-tests
+    exec:
+      component: tools
+      commandLine: mvn clean package
+      workingDir: ${PROJECT_SOURCE}
+      group:
+        kind: build
+        isDefault: false
+
+  # テスト実行
+  - id: maven-test
+    exec:
+      component: tools
+      commandLine: mvn test
+      workingDir: ${PROJECT_SOURCE}
+      group:
+        kind: test
+        isDefault: true
+
+  # Spring Bootアプリケーションの起動
+  - id: spring-boot-run
+    exec:
+      component: tools
+      commandLine: mvn spring-boot:run -Dspring-boot.run.profiles=dev
+      workingDir: ${PROJECT_SOURCE}
+      group:
+        kind: run
+        isDefault: true
+
+  # デバッグモードで起動
+  - id: spring-boot-debug
+    exec:
+      component: tools
+      commandLine: |
+        mvn spring-boot:run \
+          -Dspring-boot.run.profiles=dev \
+          -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+      workingDir: ${PROJECT_SOURCE}
+      group:
+        kind: debug
+        isDefault: true
+
+  # jarファイルから起動
+  - id: run-jar
+    exec:
+      component: tools
+      commandLine: |
+        JAR_FILE=$(find target -name "*.jar" -not -name "*-sources.jar" | head -n 1)
+        if [ -n "$JAR_FILE" ]; then
+          java -jar "$JAR_FILE"
+        else
+          echo "JAR file not found. Please run 'maven-build' first."
+          exit 1
+        fi
+      workingDir: ${PROJECT_SOURCE}
+      group:
+        kind: run
+        isDefault: false
+
+  # クリーン
+  - id: maven-clean
+    exec:
+      component: tools
+      commandLine: mvn clean
+      workingDir: ${PROJECT_SOURCE}
+
+  # 依存関係の更新
+  - id: maven-update-dependencies
+    exec:
+      component: tools
+      commandLine: mvn dependency:resolve -U
+      workingDir: ${PROJECT_SOURCE}
+
+  # PostgreSQLの接続確認
+  - id: check-postgres
+    exec:
+      component: tools
+      commandLine: |
+        echo "Checking PostgreSQL connection..."
+        if command -v pg_isready &> /dev/null; then
+          pg_isready -h localhost -p 5432 -U postgres
+        else
+          echo "pg_isready not available. Installing postgresql-client..."
+          apt-get update && apt-get install -y postgresql-client
+          pg_isready -h localhost -p 5432 -U postgres
+        fi
+      workingDir: ${PROJECT_SOURCE}
+
+  # ログの表示
+  - id: show-logs
+    exec:
+      component: tools
+      commandLine: tail -f logs/*.log 2>/dev/null || echo "No log files found in logs/ directory"
+      workingDir: ${PROJECT_SOURCE}
+
+events:
+  # ワークスペース起動時の処理
+  postStart:
+    - init-workspace
+
+  # ワークスペース作成直後の処理（初回のみ）
+  # postCreate:
+  #   - init-workspace

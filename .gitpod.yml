@@ -1,0 +1,54 @@
+image:
+  file: .gitpod.Dockerfile
+
+ports:
+  # Spring Boot application
+  - port: 8080
+    onOpen: notify
+    visibility: public
+  # Debug port
+  - port: 5005
+    onOpen: ignore
+    visibility: internal
+  # PostgreSQL
+  - port: 5432
+    onOpen: ignore
+    visibility: internal
+
+tasks:
+  # PostgreSQLの起動
+  - name: PostgreSQL
+    init: |
+      # PostgreSQLのインストール
+      sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+      wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+      sudo apt-get update
+      sudo apt-get install -y postgresql-15
+    command: |
+      # PostgreSQLの起動と設定
+      sudo service postgresql start
+      sudo -u postgres psql -c "CREATE USER postgres WITH PASSWORD 'postgres' SUPERUSER;" || true
+      sudo -u postgres createdb migration_db || true
+      echo "PostgreSQL started on port 5432"
+
+  # Spring Bootアプリケーション
+  - name: Spring Boot App
+    init: |
+      # Mavenの依存関係をダウンロード
+      mvn dependency:resolve dependency:resolve-plugins
+    command: |
+      # PostgreSQLが起動するまで待機
+      sleep 10
+      echo "Starting Spring Boot application..."
+      gp sync-done postgres-ready
+      # アプリケーションの起動
+      mvn spring-boot:run
+
+vscode:
+  extensions:
+    # Java開発用の拡張機能
+    - vscjava.vscode-java-pack
+    - vscjava.vscode-spring-boot-dashboard
+    - pivotal.vscode-spring-boot
+    - redhat.java
+    - vscjava.vscode-maven

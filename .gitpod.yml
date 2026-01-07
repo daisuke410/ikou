@@ -1,0 +1,105 @@
+image:
+  file: .gitpod.Dockerfile
+
+ports:
+  # Spring Boot application
+  - port: 8080
+    onOpen: notify
+    visibility: public
+  # Debug port
+  - port: 5005
+    onOpen: ignore
+    visibility: internal
+  # PostgreSQL
+  - port: 5432
+    onOpen: ignore
+    visibility: internal
+
+tasks:
+  # PostgreSQLの起動
+  - name: PostgreSQL
+    init: |
+      # PostgreSQLのセットアップ
+      docker run -d \
+        --name postgres-migration \
+        -e POSTGRES_USER=postgres \
+        -e POSTGRES_PASSWORD=postgres \
+        -e POSTGRES_DB=migration_db \
+        -p 5432:5432 \
+        postgres:15-alpine || echo "PostgreSQL container already exists or docker not available"
+
+      # Dockerが使用できない場合は、PostgreSQLを直接インストール
+      if ! docker ps > /dev/null 2>&1; then
+        echo "Docker not available, installing PostgreSQL directly..."
+        sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+        wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add - || true
+        sudo apt-get update || true
+        sudo apt-get install -y postgresql-15 postgresql-client-15 || true
+      fi
+    command: |
+      # Dockerコンテナが起動しているか確認
+      if docker ps -a | grep -q postgres-migration; then
+        docker start postgres-migration || true
+        echo "PostgreSQL Docker container started"
+      else
+        # PostgreSQLサービスを起動
+        sudo service postgresql start || true
+        # データベースとユーザーを作成
+        sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';" 2>/dev/null || \
+        sudo -u postgres psql -c "CREATE USER postgres WITH PASSWORD 'postgres' SUPERUSER;" 2>/dev/null || true
+        sudo -u postgres createdb migration_db 2>/dev/null || true
+        echo "PostgreSQL service started on port 5432"
+      fi
+
+      # 接続確認
+      sleep 3
+      pg_isready -h localhost -p 5432 || echo "Waiting for PostgreSQL to be ready..."
+
+  # Spring Bootアプリケーション
+  - name: Spring Boot App
+    init: |
+      # Mavenの依存関係をダウンロード
+      echo "Downloading Maven dependencies..."
+      mvn dependency:resolve dependency:resolve-plugins
+    command: |
+      # PostgreSQLが起動するまで待機
+      echo "Waiting for PostgreSQL to be ready..."
+      for i in {1..30}; do
+        if pg_isready -h localhost -p 5432 -U postgres > /dev/null 2>&1; then
+          echo "PostgreSQL is ready!"
+          break
+        fi
+        echo "Waiting... ($i/30)"
+        sleep 2
+      done
+
+      echo ""
+      echo "========================================"
+      echo "Environment is ready!"
+      echo "========================================"
+      echo ""
+      echo "To run the Spring Boot application:"
+      echo "  mvn spring-boot:run"
+      echo ""
+      echo "To run tests:"
+      echo "  mvn test"
+      echo ""
+      echo "To build:"
+      echo "  mvn clean package"
+      echo ""
+      echo "Database connection:"
+      echo "  Host: localhost"
+      echo "  Port: 5432"
+      echo "  Database: migration_db"
+      echo "  User: postgres"
+      echo "  Password: postgres"
+      echo ""
+
+vscode:
+  extensions:
+    # Java開発用の拡張機能
+    - vscjava.vscode-java-pack
+    - vscjava.vscode-spring-boot-dashboard
+    - pivotal.vscode-spring-boot
+    - redhat.java
+    - vscjava.vscode-maven

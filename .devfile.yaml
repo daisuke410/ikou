@@ -45,14 +45,10 @@ components:
   - name: postgres-k8s
     kubernetes:
       uri: postgres.yaml
-
 commands:
-  # 先にDBをapply（kubernetes componentはapplyコマンドで適用）
   - id: deploy-postgres
     apply:
       component: postgres-k8s
-    group:
-      kind: deploy
 
   - id: build
     exec:
@@ -91,3 +87,4 @@ starterProjects:
     git:
       remotes:
         origin: https://github.com/daisuke410/ikou.git
+

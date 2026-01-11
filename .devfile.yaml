@@ -66,6 +66,7 @@ starterProjects:
   - name: springbootproject
     git:
       remotes:
-        origin: https://github.com/devfile-samples/springboot-ex.git
+        origin: https://github.com/daisuke410/ikou.git
+
 
 

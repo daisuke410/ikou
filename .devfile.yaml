@@ -1,73 +1,93 @@
 schemaVersion: 2.2.2
 metadata:
-  name: java-springboot
-  displayName: Spring Boot®
-  description: Java application using Spring Boot® and OpenJDK 17
-  icon: https://raw.githubusercontent.com/devfile-samples/devfile-stack-icons/main/spring.svg
-  tags:
-    - Java
-    - Spring
+  name: ikou-springboot
+  displayName: Spring Boot + Postgres (Dev Spaces)
+  description: Spring Boot app with PostgreSQL running in the same OpenShift namespace
   projectType: springboot
   language: Java
-  version: 1.4.0
+  version: 1.0.0
   globalMemoryLimit: 2674Mi
+
 components:
   - name: tools
     container:
-      image: registry.access.redhat.com/ubi9/openjdk-21 
-      command:
-        - tail
-        - '-f'
-        - /dev/null
-      memoryLimit: 768Mi
+      # JDK 21
+      image: registry.access.redhat.com/ubi9/openjdk-21
+      command: ["tail", "-f", "/dev/null"]
+      memoryLimit: 1024Mi
       mountSources: true
       endpoints:
-        - name: https-springbt
+        - name: https-app
           targetPort: 8080
           protocol: https
-        - exposure: none
-          name: debug
+        - name: debug
           targetPort: 5858
+          exposure: none
       volumeMounts:
         - name: m2
           path: /home/user/.m2
       env:
         - name: DEBUG_PORT
-          value: '5858'
+          value: "5858"
+        # Spring側が application.yml の ${...:default} を上書きできるようにする
+        - name: DB_URL
+          value: "jdbc:postgresql://postgres:5432/migration_db"
+        - name: DB_USERNAME
+          value: "postgres"
+        - name: DB_PASSWORD
+          value: "postgres"
+
   - name: m2
     volume:
       size: 3Gi
+
+  # PostgresをOpenShiftに立てる（Service名 postgres で提供）
+  - name: postgres-k8s
+    kubernetes:
+      uri: postgres.yaml
+
 commands:
+  # 先にDBをapply（kubernetes componentはapplyコマンドで適用）
+  - id: deploy-postgres
+    apply:
+      component: postgres-k8s
+    group:
+      kind: deploy
+
   - id: build
     exec:
       component: tools
       workingDir: ${PROJECT_SOURCE}
-      commandLine: mvn clean -Dmaven.repo.local=/home/user/.m2/repository package -Dmaven.test.skip=true
-      group:
-        kind: build
-        isDefault: true
+      commandLine: mvn -Dmaven.repo.local=/home/user/.m2/repository clean package -Dmaven.test.skip=true
+    group:
+      kind: build
+      isDefault: true
+
   - id: run
     exec:
       component: tools
       workingDir: ${PROJECT_SOURCE}
       commandLine: mvn -Dmaven.repo.local=/home/user/.m2/repository spring-boot:run
-      group:
-        kind: run
-        isDefault: true
+    group:
+      kind: run
+      isDefault: true
+
   - id: debug
     exec:
       component: tools
       workingDir: ${PROJECT_SOURCE}
       commandLine: java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=${DEBUG_PORT},suspend=n -jar target/*.jar
-      group:
-        kind: debug
-        isDefault: true
+    group:
+      kind: debug
+      isDefault: true
+
+events:
+  # ワークスペース起動時に自動でDBを立てたい場合
+  preStart:
+    - deploy-postgres
+
 starterProjects:
-  - name: springbootproject
+  - name: ikou
     git:
       remotes:
         origin: https://github.com/daisuke410/ikou.git
-
-
-
-

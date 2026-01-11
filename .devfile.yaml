@@ -30,7 +30,7 @@ components:
           value: "5858"
         # DBは同一Podなので localhost にする
         - name: DB_URL
-          value: "jdbc:postgresql://localhost:5432/migration_db"
+          value: "jdbc:postgresql://postgres:5432/migration_db"
         - name: DB_USERNAME
           value: "postgres"
         - name: DB_PASSWORD
@@ -39,23 +39,6 @@ components:
   - name: m2
     volume:
       size: 3Gi
-
-  # Postgres container (same Pod)
-  - name: postgres
-    container:
-      image: postgres:16
-      memoryLimit: 768Mi
-      endpoints:
-        - name: postgres
-          targetPort: 5432
-          exposure: none
-      env:
-        - name: POSTGRES_DB
-          value: "migration_db"
-        - name: POSTGRES_USER
-          value: "postgres"
-        - name: POSTGRES_PASSWORD
-          value: "postgres"
 
 commands:
   - id: build
@@ -75,3 +58,4 @@ commands:
       component: tools
       workingDir: ${PROJECT_SOURCE}
       commandLine: java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=${DEBUG_PORT},suspend=n -jar target/*.jar
+

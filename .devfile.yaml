@@ -66,12 +66,11 @@ commands:
       workingDir: ${PROJECT_SOURCE}
       commandLine: java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=${DEBUG_PORT},suspend=n -jar target/*.jar
 
-events:
-  preStart:
-    - deploy-postgres
+
 
 starterProjects:
   - name: ikou
     git:
       remotes:
         origin: https://github.com/daisuke410/ikou.git
+

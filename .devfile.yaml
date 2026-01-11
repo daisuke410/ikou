@@ -68,9 +68,3 @@ commands:
 
 
 
-starterProjects:
-  - name: ikou
-    git:
-      remotes:
-        origin: https://github.com/daisuke410/ikou.git
-

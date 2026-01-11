@@ -17,7 +17,7 @@ components:
       mountSources: true
       endpoints:
         - name: https-app
-          targetPort: 8080
+          targetPort: 9081
           protocol: https
         - name: debug
           targetPort: 5858
@@ -58,4 +58,5 @@ commands:
       component: tools
       workingDir: ${PROJECT_SOURCE}
       commandLine: java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=${DEBUG_PORT},suspend=n -jar target/*.jar
+
 

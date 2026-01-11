@@ -11,7 +11,6 @@ metadata:
 components:
   - name: tools
     container:
-      # JDK 21
       image: registry.access.redhat.com/ubi9/openjdk-21
       command: ["tail", "-f", "/dev/null"]
       memoryLimit: 1024Mi
@@ -29,7 +28,6 @@ components:
       env:
         - name: DEBUG_PORT
           value: "5858"
-        # Spring側が application.yml の ${...:default} を上書きできるようにする
         - name: DB_URL
           value: "jdbc:postgresql://postgres:5432/migration_db"
         - name: DB_USERNAME
@@ -41,10 +39,10 @@ components:
     volume:
       size: 3Gi
 
-  # PostgresをOpenShiftに立てる（Service名 postgres で提供）
   - name: postgres-k8s
     kubernetes:
       uri: postgres.yaml
+
 commands:
   - id: deploy-postgres
     apply:
@@ -55,30 +53,20 @@ commands:
       component: tools
       workingDir: ${PROJECT_SOURCE}
       commandLine: mvn -Dmaven.repo.local=/home/user/.m2/repository clean package -Dmaven.test.skip=true
-    group:
-      kind: build
-      isDefault: true
 
   - id: run
     exec:
       component: tools
       workingDir: ${PROJECT_SOURCE}
       commandLine: mvn -Dmaven.repo.local=/home/user/.m2/repository spring-boot:run
-    group:
-      kind: run
-      isDefault: true
 
   - id: debug
     exec:
       component: tools
       workingDir: ${PROJECT_SOURCE}
       commandLine: java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=${DEBUG_PORT},suspend=n -jar target/*.jar
-    group:
-      kind: debug
-      isDefault: true
 
 events:
-  # ワークスペース起動時に自動でDBを立てたい場合
   preStart:
     - deploy-postgres
 
@@ -87,4 +75,3 @@ starterProjects:
     git:
       remotes:
         origin: https://github.com/daisuke410/ikou.git
-

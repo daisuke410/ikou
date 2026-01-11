@@ -1,4 +1,4 @@
-schemaVersion: 2.2.2
+schemaVersion: 2.3
 metadata:
   name: java-springboot
   displayName: Spring Boot®
@@ -67,3 +67,4 @@ starterProjects:
     git:
       remotes:
         origin: https://github.com/devfile-samples/springboot-ex.git
+

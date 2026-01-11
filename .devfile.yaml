@@ -2,7 +2,7 @@ schemaVersion: 2.2.2
 metadata:
   name: ikou-springboot
   displayName: Spring Boot + Postgres (Dev Spaces)
-  description: Spring Boot app with PostgreSQL running in the same OpenShift namespace
+  description: Spring Boot app with PostgreSQL running in the same workspace Pod
   projectType: springboot
   language: Java
   version: 1.0.0
@@ -28,8 +28,9 @@ components:
       env:
         - name: DEBUG_PORT
           value: "5858"
+        # DBは同一Podなので localhost にする
         - name: DB_URL
-          value: "jdbc:postgresql://postgres:5432/migration_db"
+          value: "jdbc:postgresql://localhost:5432/migration_db"
         - name: DB_USERNAME
           value: "postgres"
         - name: DB_PASSWORD
@@ -39,15 +40,24 @@ components:
     volume:
       size: 3Gi
 
-  - name: postgres-k8s
-    kubernetes:
-      uri: postgres.yaml
+  # Postgres container (same Pod)
+  - name: postgres
+    container:
+      image: postgres:16
+      memoryLimit: 768Mi
+      endpoints:
+        - name: postgres
+          targetPort: 5432
+          exposure: none
+      env:
+        - name: POSTGRES_DB
+          value: "migration_db"
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          value: "postgres"
 
 commands:
-  - id: deploy-postgres
-    apply:
-      component: postgres-k8s
-
   - id: build
     exec:
       component: tools
@@ -65,6 +75,3 @@ commands:
       component: tools
       workingDir: ${PROJECT_SOURCE}
       commandLine: java -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=${DEBUG_PORT},suspend=n -jar target/*.jar
-
-
-
